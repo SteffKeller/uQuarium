@@ -24,11 +24,7 @@
 /*************************************************************************
 * Defines Konstanten
 *************************************************************************/
-//#define LM76_1_ADRESSE 0x90 // Die I2C Adresse des LM 76, hier 0b1001'0000 da beide Adresspins(A0,A1) auf 0 gezogen sind
-//#define LM76_2_ADRESSE 0x92 // Die I2C Adresse des LM 76, hier 0b1001'0010 da beide Adresspins(A0,A1) auf 0 gezogen sind
-//#define LM76_3_ADRESSE 0x94 // Die I2C Adresse des LM 76, hier 0b1001'0100 da beide Adresspins(A0,A1) auf 0 gezogen sind
-//
-
+#define LM76_ADRESSE 0x90 // Die I2C Adresse des LM 76, hier 0b1001'0000 da beide Adresspins(A0,A1) auf 0 gezogen sind
 /*************************************************************************
 * Variablen
 *************************************************************************/

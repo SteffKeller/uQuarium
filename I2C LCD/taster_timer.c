@@ -60,46 +60,6 @@ ISR(TIMER0_OVF_vect)
 	************************************************************************/
 
     messcounter1++; // Alle 10ms +1
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
     if(messcounter1 == 50) // Wenn 0.5s vorbei
     {
         messcounter1 = 0; // Counter resetten
@@ -110,7 +70,7 @@ ISR(TIMER0_OVF_vect)
             messcounter2 = 0; // Counter resetten
             messflag_1s =1;   // Messflag setzen
 			/************************************************************************
-			*  Counter für regenpumpe_einzeit und pH Kalibrierung 
+			*  Counter für Futterstopp und pH Kalibrierung 
 			*  Falls Countdown aktiv, diesen alle 1s bis auf 0 runterzählen 
 			************************************************************************/
 			if (timer_counter) timer_counter--; 

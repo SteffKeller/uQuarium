@@ -64,7 +64,7 @@ template: {, ui_MenBehav_, 2, (Menu_Entry *) 0, (Menu_Entry *) 0, "", (FuncPtr)0
 const char str0[] PROGMEM = "1 Temperatur";			// Top Menü
 const char str1[] PROGMEM = "2 Zeit       ";	
 const char str2[] PROGMEM = "3 Licht      ";
-const char str3[] PROGMEM = "4 Regenzeiten";
+const char str3[] PROGMEM = "4 PH-Wert    ";
 const char str4[] PROGMEM = "5 Tageswerte ";
 const char str5[] PROGMEM = "6 About      ";
 
@@ -75,8 +75,7 @@ const char str13[] PROGMEM = "1-4 Alarm ";
 
 const char str20[] PROGMEM = "2-1 Zeit einst.";		// Zeit Menü
 const char str21[] PROGMEM = "2-2 Datum einst.";
-
-
+const char str22[] PROGMEM = "2-3 Futterstopp";
 
 const char str30[] PROGMEM = "3-1 Lampe ein";		// Licht Menü
 const char str31[] PROGMEM = "3-2 Lampe aus";
@@ -84,15 +83,7 @@ const char str32[] PROGMEM = "3-3 ML ein";
 const char str33[] PROGMEM = "3-4 ML aus";
 const char str34[] PROGMEM = "3-5 ML Helligkeit";
 
-
-const char str40[] PROGMEM = "4-1 Regenzeit Ein";
-const char str41[] PROGMEM = "4-2 Anzahl Regenz";
-const char str42[] PROGMEM = "4-3 Regenzeit 1";
-const char str43[] PROGMEM = "4-4 Regenzeit 2";
-const char str44[] PROGMEM = "4-5 Regenzeit 3";
-const char str45[] PROGMEM = "4-6 Regenzeit 4";
-const char str46[] PROGMEM = "4-7 Regenzeit 5";
-
+const char str40[] PROGMEM = "4-1 pH kalib.";	// pH Menü
 
 
 
@@ -105,9 +96,10 @@ Menu_Entry Menu1[4] = {
             {13, menu_has_function, sizeof (Menu1) / sizeof (Menu1[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str13, (FuncPtr)funkt_menu_alarm}
 };
 // Zeit Menü
-Menu_Entry Menu2[2] = {
+Menu_Entry Menu2[3] = {
             {20, menu_has_function, sizeof (Menu2) / sizeof (Menu2[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str20, (FuncPtr)funkt_menu_uhr},
-            {21, menu_has_function, sizeof (Menu2) / sizeof (Menu2[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str21, (FuncPtr)funkt_menu_datum}
+            {21, menu_has_function, sizeof (Menu2) / sizeof (Menu2[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str21, (FuncPtr)funkt_menu_datum},
+			{22, menu_has_function, sizeof (Menu2) / sizeof (Menu2[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str22, (FuncPtr)funkt_menu_futterstop}
 };
 // Licht Menü
 Menu_Entry Menu3[5] = {
@@ -117,15 +109,9 @@ Menu_Entry Menu3[5] = {
             {33, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str33, (FuncPtr)funkt_menu_mondlicht_aus},
 		    {34, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str34, (FuncPtr)funkt_menu_mondlicht_helligkeit},
 };
-// Regenzeiten Menü
-Menu_Entry Menu4[7] = {
-			{40, menu_has_function, sizeof (Menu4) / sizeof (Menu4[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str40, (FuncPtr)funkt_menu_regenpumpe_einzeit},
-			{41, menu_has_function, sizeof (Menu4) / sizeof (Menu4[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str41, (FuncPtr)funkt_menu_regenzeitzaehler},
-            {42, menu_has_function, sizeof (Menu4) / sizeof (Menu4[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str42, (FuncPtr)funkt_menu_regenzeit1},
-            {43, menu_has_function, sizeof (Menu4) / sizeof (Menu4[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str43, (FuncPtr)funkt_menu_regenzeit2},
-			{44, menu_has_function, sizeof (Menu4) / sizeof (Menu4[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str44, (FuncPtr)funkt_menu_regenzeit3},
-            {45, menu_has_function, sizeof (Menu4) / sizeof (Menu4[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str45, (FuncPtr)funkt_menu_regenzeit4},
-			{46, menu_has_function, sizeof (Menu4) / sizeof (Menu4[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str46, (FuncPtr)funkt_menu_regenzeit5}
+// pH Menü
+Menu_Entry Menu4[1] = {
+            {40, menu_has_function, sizeof (Menu4) / sizeof (Menu4[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str40, (FuncPtr)funkt_menu_phwert_kalibrieren}
 };
 
 // Top Menü
@@ -159,11 +145,6 @@ void init_menu(void){       //Initializes menu.
 	Menu2[0].parent = MainMenu;
 	Menu2[1].parent = MainMenu;
 	Menu2[2].parent = MainMenu;
-	Menu2[3].parent = MainMenu;
-	Menu2[4].parent = MainMenu;
-	Menu2[5].parent = MainMenu;
-	Menu2[6].parent = MainMenu;
-	Menu2[7].parent = MainMenu;
 	
     Menu3[0].parent = MainMenu;
 	Menu3[1].parent = MainMenu;

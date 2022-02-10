@@ -26,13 +26,11 @@
 #include <avr/wdt.h>		// Watchdog
 #include "DS1307.h"			// I2C Echtzeituhr
 #include "LM76.h"			// I2C Temperatursensor
-#include "hih6131.h"
-#include "uart.h"			// UART Library
+//#include "uart.h"			// UART Library
 #include "i2clcd.h"			// Ansteuerung LCD Display über I2C
 #include "taster_timer.h"	// Timer und Tasten entprellen
 #include "lcdmenu.h"		// Menü für Einstellungen
 #include "adc.h"			// ADC-Wandler und pH
-#include "mem-check.h"
 /*************************************************************************
 * Makros
 *************************************************************************/
@@ -66,7 +64,7 @@
 #define PUMPE_ZUSTAND (PINA & (1<<PINA0))
 
 // LED für Alarm		-> Port C Pin 6
-#define ALARMLED_ON	 (PORTC |= 1<<PC6)
+#define ALARMLED_ON	(PORTC |= 1<<PC6)
 #define ALARMLED_OFF (PORTC &= ~(1<<PC6))
 
 // LED für Run Modus	-> Port X Pin 7
@@ -80,29 +78,18 @@
 #define LCDBACKLIGHT_ON_ZEIT 30		// Einschaltzeit des LCD Backlight (sec)
 #define WARTEZEIT_PH_KALIBRIEREN 180	// Wartezeit bei pH Sonde kalibrieren (sec)
 
-const uint8_t LM76_ADRESS[] = {0x90,0x92,0x94};
-#define hih6131_adress  0x4e
-
 /*************************************************************************
 * Variablen
 *************************************************************************/
-int8_t temperatur_offset[] = {0,0,0}; 
-uint16_t temperatur[] = {0,0,0}; 
-uint16_t huminity= 0;
-uint16_t hih_temperatur = 0;
-int8_t mondlicht_helligkeit =0, regenzeitenanzahl= 0;
+int8_t temperatur_offset = 0, mondlicht_helligkeit =0;
 uint8_t alarm_vektor = 0;	//Vektor zur Alarmzustand
 uint8_t MOON_ZUSTAND = 0;	// Mondlicht ein oder aus -> Da wegen PWM nicht direkt über Port abfragbar
-uint8_t i;
-volatile uint16_t mem;
+uint16_t temperatur = 0, ph_wert = 0; 
 
-uint8_t ph_wert = 0; 
-
-char anzeigetext[42];	// Sting Array für Ausgabe auf LCD -> zwei Zeilen
-char anzeigetext1[22];	// String Array für Ausgabe auf LCD -> eine Zeile
-char anzeigetext2[22];	// String Array für Ausgabe auf LCD -> eine Zeile
+char anzeigetext[41];	// Sting Array für Ausgabe auf LCD -> zwei Zeilen
+char anzeigetext1[21];	// String Array für Ausgabe auf LCD -> eine Zeile
+char anzeigetext2[21];	// String Array für Ausgabe auf LCD -> eine Zeile
 const char wochentagname [8][3] PROGMEM= {"  ","Mo","Di","Mi","Do","Fr","Sa","So"}; // Wochentage im Flash
-const char LM76_NAME [3][3] PROGMEM= {"B","M","H"};
 // Alarm Strings im Flash werden über alarm_vektor aufgerufen	
 const char alarm_strings [7][9] PROGMEM= {"Alles OK", // Vektor O -> kein Alarm
 									"I2C ERR!",	// Vektor 1	-> Error I2C Übertragung
@@ -118,9 +105,7 @@ struct uhr
 			lampe_off,	// Ausschaltzeit der Aquarium Lampe
 			ml_on,		// Einschaltzeit des Mondlichts
 			ml_off,		// Ausschaltzeit des Mondlichts
-			regenpumpe_einzeit;// Pumpenstoppzeit für Fütterung
-
-struct uhr regenzeit[5];
+			futterstopp;// Pumpenstoppzeit für Fütterung
 
 typedef struct schalt_werte // Schaltwerte für Temperatur
 {
@@ -147,16 +132,14 @@ typedef struct Extrem_Werte
 	int16_t min_wert;	// Minimaler Tageswert
 	uhr max_zeitpunkt;	// Zeitpunkt bei neuem Max Wert
 	uhr min_zeitpunkt;	// Zeitpunkt bei neuem Min Wert
-	uint8_t lm76_nr_max;// LM76 Welcher die höchste Temperatur hatte
-	uint8_t lm76_nr_min;// LM76 Welcher die kleinste Temperatur hatte
 	
 }Extrem_Werte;
-Extrem_Werte extrem_temperatur, extrem_huminity;
+Extrem_Werte extrem_temperatur, extrem_ph;
 
 /*************************************************************************
 * Statische Variablem im EEPROM entsprechend der Variablen im RAM 
 *************************************************************************/
-int8_t			temperatur_offset_eeprom[3] EEPROM =	{0,0,0};
+int8_t			temperatur_offset_eeprom EEPROM =		0;
 uint8_t			mondlicht_helligkeit_eeprom EEPROM =	0;
 schalt_werte	alarm_eeprom EEPROM =					{395,370,0};
 schalt_werte	heizer_eeprom EEPROM =					{395,370,0};
@@ -167,9 +150,7 @@ uhr				lampe_on_eeprom EEPROM=					{0,0,12,0,0,0,0};
 uhr				lampe_off_eeprom EEPROM =				{0,0,12,0,0,0,0};
 uhr				ml_on_eeprom EEPROM=					{0,0,12,0,0,0,0};
 uhr				ml_off_eeprom EEPROM=					{0,0,12,0,0,0,0};
-uhr				regenpumpe_einzeit_eeprom EEPROM =		{0,1,0,0,0,0,0};
-uhr				regenzeit_eeprom[5] EEPROM=				{{0,0,12,0,0,0,0},{0,0,12,0,0,0,0},{0,0,12,0,0,0,0},{0,0,12,0,0,0,0},{0,0,12,0,0,0,0}};
-int8_t			regenzeitenanzahl_eeprom EEPROM =		0;
+uhr				futterstopp_eeprom EEPROM =				{0,1,0,0,0,0,0};
 
 	
 /*************************************************************************
@@ -236,7 +217,7 @@ void menue_datum_einstellen( struct uhr *datum_pointer);
  * PE:int8_t * offset - Temperatur Versatz in +-0.1 Grad
  * PA:void
  *************************************************************************/
-void menue_temperatur_offset(int8_t *offset,uint8_t lm76_addr,uint8_t lm76_nr, int8_t *eeprom_addr);
+void menue_temperatur_offset( int8_t *offset);
 /*************************************************************************
  * menue_schalttemperaturen_einstellen(..) -  Menü um die Schalttemperaturen vom Heizer, Lüfter und Alarmschwelle zu ändern
  * PE:unsigned char * text1 // Text der an LCD Position (2,1) angezeigt wird
@@ -326,54 +307,12 @@ void funkt_menu_lampe_ein(void);
 *************************************************************************/
 void funkt_menu_lampe_aus(void);
 /*************************************************************************
- * funkt_menu_regenpumpe_einzeit(..) - Funktionsmenü zur Einstellung der 
+ * funkt_menu_futterstop(..) - Funktionsmenü zur Einstellung der 
  * Zeit wie lange die Pumpe beim Fütterungsstopp ausgeschaltet werden soll
  * PE:void
  * PA:void
 *************************************************************************/
-void funkt_menu_regenpumpe_einzeit(void);
-/*************************************************************************
- * funkt_menu_regenpumpe_einzeit(..) - Funktionsmenü zur Einstellung der 
- * Zeit wie lange die Pumpe beim Fütterungsstopp ausgeschaltet werden soll
- * PE:void
- * PA:void
-*************************************************************************/
-void funkt_menu_regenzeit1(void);
-/*************************************************************************
- * funkt_menu_regenpumpe_einzeit(..) - Funktionsmenü zur Einstellung der 
- * Zeit wie lange die Pumpe beim Fütterungsstopp ausgeschaltet werden soll
- * PE:void
- * PA:void
-*************************************************************************/
-void funkt_menu_regenzeit2(void);
-/*************************************************************************
- * funkt_menu_regenpumpe_einzeit(..) - Funktionsmenü zur Einstellung der 
- * Zeit wie lange die Pumpe beim Fütterungsstopp ausgeschaltet werden soll
- * PE:void
- * PA:void
-*************************************************************************/
-void funkt_menu_regenzeit3(void);
-/*************************************************************************
- * funkt_menu_regenpumpe_einzeit(..) - Funktionsmenü zur Einstellung der 
- * Zeit wie lange die Pumpe beim Fütterungsstopp ausgeschaltet werden soll
- * PE:void
- * PA:void
-*************************************************************************/
-void funkt_menu_regenzeit4(void);
-/*************************************************************************
- * funkt_menu_regenpumpe_einzeit(..) - Funktionsmenü zur Einstellung der 
- * Zeit wie lange die Pumpe beim Fütterungsstopp ausgeschaltet werden soll
- * PE:void
- * PA:void
-*************************************************************************/
-void funkt_menu_regenzeit5(void);
-/*************************************************************************
- * funkt_menu_mondlicht_ein(..) - Funktionsmenü zur Einstellung der 
- * Einschaltzeit des Mondlichts
- * PE:void
- * PA:void
- */
- void funkt_menu_regenzeitzaehler(void);
+void funkt_menu_futterstop(void);
 /*************************************************************************
  * funkt_menu_mondlicht_ein(..) - Funktionsmenü zur Einstellung der 
  * Einschaltzeit des Mondlichts
@@ -452,12 +391,12 @@ void temperatuen_schalten(void);
  *************************************************************************/
 void ausgaenge_ansteuern( void );
 /*************************************************************************
- * regenpumpe_aktivieren(..) -  Für Pumpenstopp bei der Fütterung wird ein Counter geladen 
+ * futterstop_aktivieren(..) -  Für Pumpenstopp bei der Fütterung wird ein Counter geladen 
  * welcher über den Timer alle 1 sec dekrementiert wird bis Zeit abgelaufen ist
  * PE:struct uhr * stopp_zeit // Pointer auf Zeit wie lange die Pumpe ausgeschaltet werden soll
  * PA:void
  *************************************************************************/
-void regenpumpe_aktivieren(struct uhr *stopp_zeit);
+void futterstop_aktivieren(struct uhr *stopp_zeit);
 /*************************************************************************
  * read_eeprom_daten(..) - Statische Werte nach einen Reset aus dem EEPROM holen
  * PA:void

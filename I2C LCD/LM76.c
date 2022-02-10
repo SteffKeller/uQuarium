@@ -53,7 +53,6 @@ int16_t get_lm76_temperatur_4x(uint8_t adresse)
 {
 	int16_t temperatur_array[4]; // Array Temperaturen zwischenspeichern
 	uint8_t i;
-	
 	static int16_t letzte_ok_temperatur; // Letzte korrekt ausgelesene Temperatur
 	uint8_t fehler = 0;					 // Fehlervariable falls temperaturen nicht identisch
 	

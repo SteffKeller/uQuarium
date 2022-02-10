@@ -19,7 +19,7 @@
 #endif
 
 /* I2C clock in Hz */
-#define SCL_CLOCK 100000L // I2C Clock 100'000 kHz I2C im Standard Mode
+#define SCL_CLOCK  100000L // I2C Clock 100'000 kHz I2C im Standard Mode
 /*************************************************************************
  Initialization of the I2C bus interface. Need to be called only once
 *************************************************************************/

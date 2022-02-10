@@ -1,10 +1,10 @@
 /************************************************************************
  * Titel :		main.c
- * Projekt:		Terrariumsteuerung µTerrarium
+ * Projekt:		Diplomarbeit Aquariumsteuerung µQuarium
  * Funktion:	Hauptprogramm der Steuerung
  * Autor :		Stefan Keller
  * Lehrgang:	Techniker HF ET 08-11 Klasse A
- * Datum :		4.9.2011
+ * Datum :		4.9.20111
  ************************************************************************/
 
 #include "main.h"
@@ -13,7 +13,6 @@
 *************************************************************************/
 int main(void)
 {
-
  	/*************************************************************************
 	*Hardware initialisieren 
 	*************************************************************************/
@@ -23,7 +22,6 @@ int main(void)
 		MCUSR &= ~(1<<WDRF);	// Watchdog Reset Flag resetten
 	}
 	wdt_disable();				// Watchdog deaktivieren
-
     timer_init();				// Timer initialisieren
     read_eeprom_daten();		// gespeicherte Daten aus dem EEPROM laden
     init_taster();				// Tasten entprellen initialisieren
@@ -31,7 +29,7 @@ int main(void)
     ds_1307_init();				// DS1307 initialisieren
     lcd_init();					// LCD initialisieren
     init_ports();				// Ports Ein-Ausgänge initialisieren
-	//adc_init();					// AD-Wandler initialisieren
+	adc_init();					// AD-Wandler initialisieren
     //uart_init( UART_BAUD_SELECT(UART_BAUD_RATE,F_CPU) ); // UART für RS232 initialisieren
     sei();						// Global Interrupt freigeben
 	/*************************************************************************
@@ -39,20 +37,15 @@ int main(void)
 	*************************************************************************/
     _delay_ms(1000);            // 1s warten, um LM76 genügend zeit zu geben die erste Temperatur zu berechnen
 	wdt_enable(WDTO_1S);		// Watchdog aktivieren -> Timer 1s
-	for ( i = 0;i<3; i++)
-	{
-		temperatur[i] = get_lm76_temperatur(LM76_ADRESS[i])+ temperatur_offset[i]; // Erstes mal die Temperatur vom LM76 holen, so das die Ausgänge von anfang an richtig gesetzt werden
-	}
-    
+    temperatur = get_lm76_temperatur(LM76_ADRESSE)+ temperatur_offset; // Erstes mal die Temperatur vom LM76 holen, so das die Ausgänge von anfang an richtig gesetzt werden
     get_ds1307_zeit_datum(&zeit);// Erstes mal die Zeit vom DS1307 holen, so das die Ausgänge von anfang an richtig gesetzt werden
-	get_hih6131_data(hih6131_adress, &huminity, &hih_temperatur);
-	//ph_wert = read_phwert(&phwert_referenzen); // Erstes mal den pH Wert einlesen, so das die Ausgänge von anfang an richtig gesetzt werden
-    extrem_temperatur.max_wert = temperatur[0]; // Tages Min/Max Werte auf aktuelle Temperatur setzen
-    extrem_temperatur.min_wert = temperatur[0];
-	extrem_huminity.max_wert = huminity;			 // Tages Min/Max Werte auf aktuellen pH Wert setzen
-	extrem_huminity.min_wert = huminity;
+	ph_wert = read_phwert(&phwert_referenzen); // Erstes mal den pH Wert einlesen, so das die Ausgänge von anfang an richtig gesetzt werden
+    extrem_temperatur.max_wert = temperatur; // Tages Min/Max Werte auf aktuelle Temperatur setzen
+    extrem_temperatur.min_wert = temperatur;
+	extrem_ph.max_wert = ph_wert;			 // Tages Min/Max Werte auf aktuellen pH Wert setzen
+	extrem_ph.min_wert = ph_wert;
 	zustandsbit.run = 1;		// Steuerung in Run Mode
-	zustandsbit.pumpe = 0;		// Pumpe eingeschaltet
+	zustandsbit.pumpe = 1;		// Pumpe eingeschaltet
     /*************************************************************************
     * Menü initialisieren
     *************************************************************************/
@@ -70,9 +63,6 @@ int main(void)
 	*************************************************************************/
     while (true) 
     {	
-		sei();
-			_delay_ms(250);
-			cli(); 
 		wdt_reset();	// Watchdog bei jedem Durchlauf resetten
 		main_anzeige(); //Hauptbildschirm anzeigen
 		/*************************************************************************
@@ -122,7 +112,7 @@ int main(void)
 		*************************************************************************/
 		if(get_key_press(1<<KEY_F))
 		{
-			regenpumpe_aktivieren(&regenpumpe_einzeit);
+			futterstop_aktivieren(&futterstopp);
 			lcd_backlight(ON);	// Backlight ein
 			lichtaus = 0;		// Counter für Backlight resetten
 		}
@@ -161,9 +151,9 @@ int main(void)
 			reset_tageswerte(); // Um Mitternacht Tages Min- und Maxwerte löschen
 			if (timer_counter)				// Pumpenstopp aktiv
 			{
-				zustandsbit.pumpe = 1;		// Zustandsbit für Pumpe ein
+				zustandsbit.pumpe = 0;		// Zustandsbit für Pumpe ein
 			}
-			else zustandsbit.pumpe = 0;		// Zustandsbit für Pumpe aus
+			else zustandsbit.pumpe = 1;		// Zustandsbit für Pumpe aus
 			ausgaenge_ansteuern();	
 			
         }
@@ -175,23 +165,14 @@ int main(void)
         if (messflag_1s) // Wenn 1s vorbei, wird durch Timerinterrupt gesteuert 
         {
             messflag_1s =0;								// ISR Flag zurücksetzen
-			for ( i = 0;i<sizeof(LM76_ADRESS); i++)
-			{
-				temperatur[i] = get_lm76_temperatur(LM76_ADRESS[i])+ temperatur_offset[i]; // Temperatur vom LM76 holen und Offset addieren;
-				get_hih6131_data(hih6131_adress, &huminity, &hih_temperatur);
-			}	
-				//temperatur[0] = get_lm76_temperatur_4x(LM76_1_ADRESSE)+ temperatur_offset; // Temperatur vom LM76 holen und Offset addieren;
-				//ph_wert = read_phwert(&phwert_referenzen);	// pH Wert über ADC holen 
-				temperatuen_schalten();						// Zustandsbit für Temperatur gesteuerte Ausgänge schalten
-				//send_to_uart();								// aktuelle Werte über UART senden
-				if(lichtaus > LCDBACKLIGHT_ON_ZEIT) lcd_backlight(OFF);	// überprüfen ob Zeit für Backlight in abgelaufen		
-				else lichtaus++;
-											// ansonsten Variable für Backlight inkrementieren
-			}
-			//mem = get_mem_unused(); 
-			  
-		}
-				
+            temperatur = get_lm76_temperatur_4x(LM76_ADRESSE)+ temperatur_offset; // Temperatur vom LM76 holen und Offset addieren;
+			ph_wert = read_phwert(&phwert_referenzen);	// pH Wert über ADC holen 
+            temperatuen_schalten();						// Zustandsbit für Temperatur gesteuerte Ausgänge schalten
+			//send_to_uart();								// aktuelle Werte über UART senden
+			if(lichtaus > LCDBACKLIGHT_ON_ZEIT) lcd_backlight(OFF);	// überprüfen ob Zeit für Backlight in abgelaufen		
+			else lichtaus++;							// ansonsten Variable für Backlight inkrementieren
+		}        
+    }
 }
 /*************************************************************************
  * timer_init(..) - Timer 0 und Timer 1 des Atmega 644p initialisieren
@@ -202,7 +183,6 @@ void timer_init(void)
 {
 	//Timer 0 für Tastenentprellen und zeitgesteuertes Einlesen der Messwerte 
 	TCCR0B |= (1<<CS00)|(1<<CS02);		// Clock/1024 ergibt Timerfrequenz von 15625 Hz
-	TIMSK0 = 0x0;
     TIMSK0 |= 1<<TOIE0;					// Timer 0 Interrupt einschalten
 	//Timer 1B für PWM Mondlicht
 	TCCR1A = (1<<COM1B1) | (1<<WGM10);	// PWM-Mode 1,  8Bit PWM zählt bis 255, Phasenkorrekt
@@ -287,6 +267,7 @@ void phwert_to_string( uint16_t ph_wert, char* temp_buffer)
 {
 	uint16_t ganze_ph; // Hilfsvariable für Zahl vor dem Komma
 	uint16_t zentel_ph; // Hilfsvariable für Zahl hinter dem Komma
+	uint32_t local_ph;
 	
 	ph_wert += 50;							// Auf zehntel runden
 	ganze_ph = ph_wert / 1000;				// umrechnen in ganze Ph
@@ -510,7 +491,7 @@ void menue_datum_einstellen( struct uhr *datum_pointer)
  * PE:int8_t * offset - Temperatur Versatz in +-0.1 Grad
  * PA:void
  *************************************************************************/
-void menue_temperatur_offset(int8_t *offset,uint8_t lm76_addr,uint8_t lm76_nr, int8_t *eeprom_addr)
+void menue_temperatur_offset( int8_t *offset)
 {
     uint8_t offset_alt;            // Hilfsvariable falls Offset nicht gespeichert werden soll
     uint32_t aktuelle_temperatur;  //Hilfsvariable
@@ -520,12 +501,9 @@ void menue_temperatur_offset(int8_t *offset,uint8_t lm76_addr,uint8_t lm76_nr, i
     lcd_printlc(1,1,(unsigned char*) "Temperatur Offset:");
     while(1)
     {
-        aktuelle_temperatur = get_lm76_temperatur(lm76_addr);				// Temperatur vom LM76 holen
+        aktuelle_temperatur = get_lm76_temperatur(LM76_ADRESSE);				// Temperatur vom LM76 holen
         temperatur_to_string(aktuelle_temperatur,anzeigetext1);					// Temperatur String erzeugen
-        lcd_printlc(2,1,(unsigned char*) "LM76-");						// String ausgeben
-		itoa(lm76_nr, anzeigetext2, 10);
-		lcd_print(anzeigetext2);
-		lcd_print((unsigned char*) ":      ");	
+        lcd_printlc(2,1,(unsigned char*) "LM76:       ");						// String ausgeben
         lcd_print((unsigned char*) anzeigetext1);								// Temperatur String ausgeben
         lcd_printlc(3,1,(unsigned char*) "Korr.. Temp: ");					    // String ausgeben
         temperatur_to_string((aktuelle_temperatur + *offset),anzeigetext1);		// Korrigierte Temperatur String erzeugen
@@ -541,7 +519,7 @@ void menue_temperatur_offset(int8_t *offset,uint8_t lm76_addr,uint8_t lm76_nr, i
             lcd_command(LCD_CLEAR);
             lcd_printlc(1,1,(unsigned char*) "Speichere Daten");
 			cli(); // Interrupts global ausschalten das EEPROM Zugriffe zeitkritisch
-            eeprom_write_byte(eeprom_addr, *offset);				// Schreibe Offset ins EEPROM
+            eeprom_write_byte(&temperatur_offset_eeprom, *offset);				// Schreibe Offset ins EEPROM
 			sei();	// Interrupts global einschalten
             _delay_ms(500);
             lcd_command(LCD_CLEAR);
@@ -569,7 +547,7 @@ void menue_schalttemperaturen_einstellen( unsigned char *text1, unsigned char *t
     struct schalt_werte alt;
     char buffer[7];
     alt = *schalt_aktuell;
-     *buffer  = NULL;
+    *buffer = NULL;
 
     lcd_printlc(2,1,(unsigned char*) text1);  // übergebenen String auf Linie 1 ausgeben
     lcd_printlc(3,1, (unsigned char*) text2); // übergebenen String auf Linie 1 ausgeben
@@ -798,12 +776,8 @@ void menu_phwert_kalibrieren(void)
 void funkt_menu_temperatur_offet(void)
 {
     lcd_command(LCD_CLEAR);
-	for (i=0; i<3;i++)
-	{
-			// Eigentliches Menü für die Einstellung des Offsets mit entsprechendem Übergabewert aufrufen
-    menue_temperatur_offset(&temperatur_offset[i], LM76_ADRESS[i],i,&temperatur_offset_eeprom[i]);
-	}
-
+	// Eigentliches Menü für die Einstellung des Offsets mit entsprechendem Übergabewert aufrufen
+    menue_temperatur_offset(&temperatur_offset);
     lcd_command(LCD_CLEAR);
 }
 /*************************************************************************
@@ -815,7 +789,7 @@ void funkt_menu_temperatur_offet(void)
 void funkt_menu_heizer(void)
 {
     lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Heizer Boden Einst."))); // Menüstring anzeigen
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Heizer Einstellungen"))); // Menüstring anzeigen
 	// Eigentliches Menü für die Einstellung der Schalttemperaturen mit entsprechenden Texten und Übergabewerten aufrufen
     menue_schalttemperaturen_einstellen(strcpy_P (anzeigetext,PSTR("Heizer ein:")), strcpy_P (anzeigetext1,PSTR("Heizer aus:")), strcpy_P (anzeigetext2,PSTR("Hysterese:")),&heizer, &heizer_eeprom);
     lcd_command(LCD_CLEAR);
@@ -900,107 +874,19 @@ void funkt_menu_lampe_aus(void)
     menue_zeiten_einstellen(&lampe_off, &lampe_off_eeprom );
 }
 /*************************************************************************
- * funkt_menu_regenpumpe_einzeit(..) - Funktionsmenü zur Einstellung der 
+ * funkt_menu_futterstop(..) - Funktionsmenü zur Einstellung der 
  * Zeit wie lange die Pumpe beim Fütterungsstopp ausgeschaltet werden soll
  * PE:void
  * PA:void
 *************************************************************************/
-void funkt_menu_regenpumpe_einzeit(void)
+void funkt_menu_futterstop(void)
 {
 	lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Einschaltdauer der Regenpumpe:"))); // Menüstring anzeigen
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Futter Stopp Dauer  eingeben:"))); // Menüstring anzeigen
 	// Eigentliches Menü für die Einstellung der Fütterungsstoppzeit mit entsprechenden Übergabewerten aufrufen
-    menue_zeiten_einstellen(&regenpumpe_einzeit, &regenpumpe_einzeit_eeprom );
+    menue_zeiten_einstellen(&futterstopp, &futterstopp_eeprom );
 	
 }
-void funkt_menu_regenzeit1(void)
-{
-	lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Regenzeit 1:"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Fütterungsstoppzeit mit entsprechenden Übergabewerten aufrufen
-    menue_zeiten_einstellen(&regenzeit[0], &regenzeit_eeprom[0] );
-	
-}
-void funkt_menu_regenzeit2(void)
-{
-	lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Regenzeit 2:"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Fütterungsstoppzeit mit entsprechenden Übergabewerten aufrufen
-   menue_zeiten_einstellen(&regenzeit[1], &regenzeit_eeprom[1] );
-	
-}
-void funkt_menu_regenzeit3(void)
-{
-	lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Regenzeit 3:"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Fütterungsstoppzeit mit entsprechenden Übergabewerten aufrufen
-    menue_zeiten_einstellen(&regenzeit[2], &regenzeit_eeprom[2] );
-	
-}
-void funkt_menu_regenzeit4(void)
-{
-	lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Regenzeit 4:"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Fütterungsstoppzeit mit entsprechenden Übergabewerten aufrufen
-    menue_zeiten_einstellen(&regenzeit[3], &regenzeit_eeprom[3] );
-	
-}
-void funkt_menu_regenzeit5(void)
-{
-	lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Regenzeit 5:"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Fütterungsstoppzeit mit entsprechenden Übergabewerten aufrufen
-    menue_zeiten_einstellen(&regenzeit[4], &regenzeit_eeprom[4] );
-	
-}
- void funkt_menu_regenzeitzaehler(void)
- {
-	uint8_t display_update =1; // Hilfsvariablen 
-	uint8_t regenanzahl_alt; 
-	regenanzahl_alt = regenzeitenanzahl; 
-	lcd_command(LCD_CLEAR);
-	lcd_printlc(1,1,(unsigned char*)"Anzahl Regenzeiten:");
-
-	
-	while(true)
-	{
-	if(display_update)										
-       {
-            display_update =0;
-            sprintf(anzeigetext1, "%01u",regenzeitenanzahl );
-            lcd_printlr(2,1,(unsigned char*)anzeigetext1);	
-        }
-        
-        if (get_key_press( 1<<KEY_OK) | get_key_rpt(1<< KEY_OK))
-        {
-            lcd_command(LCD_CLEAR);
-            lcd_printlc(1,1,(unsigned char*) "Speichere Daten");
-			cli();
-            eeprom_write_byte(&regenzeitenanzahl_eeprom , regenzeitenanzahl);	
-			sei();
-            _delay_ms(500);
-            lcd_command(LCD_CLEAR);
-            break;											// Menue verlassen
-        }
-        if (get_key_press( 1<<KEY_ESC) | get_key_rpt(1<< KEY_ESC))
-        {
-            regenzeitenanzahl= regenanzahl_alt;			
-            break;											// Menue verlassen
-        }
-		
-		if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))// Taste UP gedrückt
-        {
-            (regenzeitenanzahl == 5) ? (regenzeitenanzahl =0) : (regenzeitenanzahl+=1);	
-            display_update = 1;																
-        }
-        else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))						
-        {
-            (regenzeitenanzahl == 0) ? (regenzeitenanzahl =5) : (regenzeitenanzahl-=1);
-            display_update = 1;															
-        }
-	}	
-	 
- }
 /*************************************************************************
  * funkt_menu_mondlicht_ein(..) - Funktionsmenü zur Einstellung der 
  * Einschaltzeit des Mondlichts
@@ -1064,10 +950,10 @@ void funkt_menu_phwert_kalibrieren(void)
 void funkt_menu_about(void)
 {
 	lcd_command(LCD_CLEAR);
-	lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("uTerrarium.")));
+	lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("uQuarium Diplomarb.")));
 	lcd_printlrc(2,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Stefan Keller")));
 	lcd_printlrc(3,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("HW M:V1.0 F:V1.0")));
-	lcd_printlrc(4,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("SW:V1.2")));
+	lcd_printlrc(4,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("SW:V1.0")));
 	
 	while (true)
 	{
@@ -1086,37 +972,31 @@ void funkt_menu_about(void)
  *************************************************************************/
 void funkt_menu_max_werte(void)
 {
-	
 	lcd_command(LCD_CLEAR);
 	// Tagesmaximum Temperatur und Zeitpunkt in String umwandeln und anzeigen
-	lcd_printlc(1,1,(unsigned char *)strcpy_P (anzeigetext,LM76_NAME[extrem_temperatur.lm76_nr_max]));
-	lcd_print((unsigned char *)strcpy_P (anzeigetext,PSTR("-Max:")));
+	lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("T-Max:")));
 	temperatur_to_string(extrem_temperatur.max_wert,anzeigetext1);
     lcd_print((unsigned char*) anzeigetext1);
 	zeit_to_string(extrem_temperatur.max_zeitpunkt, anzeigetext1);
     lcd_printlrc(1,13,(unsigned char*)anzeigetext1);
 	// Tagesminimum Temperatur und Zeitpunkt in String umwandeln und anzeigen
-	lcd_printlc(2,1,strcpy_P (anzeigetext,LM76_NAME[extrem_temperatur.lm76_nr_min]));
-	lcd_print((unsigned char *)strcpy_P (anzeigetext,PSTR("-Min:")));
+	lcd_printlrc(2,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("T-Min:")));
 	temperatur_to_string(extrem_temperatur.min_wert,anzeigetext1);
     lcd_print((unsigned char*) anzeigetext1);
 	zeit_to_string(extrem_temperatur.min_zeitpunkt, anzeigetext1);
 	lcd_printlrc(2,13,(unsigned char*)anzeigetext1);
-	// Tagesmaximum Feuchtigkeitswert Wert und Zeitpunkt in String umwandeln und anzeigen
-	lcd_printlrc(3,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Hu-Max:")));
-	sprintf(anzeigetext1, "%02d",extrem_huminity.max_wert);
-	lcd_print(anzeigetext1);						// Feuchtigkeit anzeigen
-	lcd_putchar('%');	
-	zeit_to_string(extrem_huminity.max_zeitpunkt, anzeigetext1);
+	// Tagesmaximum pH Wert und Zeitpunkt in String umwandeln und anzeigen
+	lcd_printlrc(3,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("pHMax:")));
+	phwert_to_string(extrem_ph.max_wert, anzeigetext1);
+	lcd_print((unsigned char*) anzeigetext1);	
+	zeit_to_string(extrem_ph.max_zeitpunkt, anzeigetext1);
 	lcd_printlrc(3,13,(unsigned char*)anzeigetext1);
 	// Tagesminimum pH Wert und Zeitpunkt in String umwandeln und anzeigen
-	lcd_printlrc(4,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Hu-Min:")));
-	sprintf(anzeigetext1, "%02d",extrem_huminity.min_wert);
-	lcd_print(anzeigetext1);						// Feuchtigkeit anzeigen
-	lcd_putchar('%');	
-	zeit_to_string(extrem_huminity.min_zeitpunkt, anzeigetext1);
+	lcd_printlrc(4,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("pHMin:")));
+	phwert_to_string(extrem_ph.min_wert, anzeigetext1);
+	lcd_print((unsigned char*) anzeigetext1);
+	zeit_to_string(extrem_ph.min_zeitpunkt, anzeigetext1);
 	lcd_printlrc(4,13,(unsigned char*)anzeigetext1);
-	
 	
 	while (true)
 	{
@@ -1167,12 +1047,7 @@ uint8_t vergleiche_zeiten(struct uhr *ein_zeit, struct uhr *aus_zeit, struct uhr
 		// So muss die Aktuelle Zeit grösser als ein Einzeit sein ODER kleiner als die Ausschaltzeit, dann ist der Verbraucher eingeschaltet
         return ((aktuell > ein) || (aktuell < aus)); 
     }
-    else if ( ein == aus) // Regenpumpe einschalten? ein und auszeit gleich
-    {
-		// So muss die Aktuelle Zeit gleich sein wie die einzeit
-        return (ein == aktuell); 
-    }
-	else // Wenn der Ausgang innerhalb eines Tages eingeschaltet werden soll -> Auszeit grösser als Einzeit
+    else // Wenn der Ausgang innerhalb eines Tages eingeschaltet werden soll -> Auszeit grösser als Einzeit
     {
 		// So muss die Aktuelle Zeit grösser als die Einzeit sein UND kleiner als die Auszeit, dann ist der Verbraucher eingeschaltet
         return ((aktuell > ein) && (aktuell < aus)); 
@@ -1210,22 +1085,6 @@ void lampen_schalten(void)
     {
         zustandsbit.mondlicht =0; // Mondlicht aus
     }
-	/*************************************************************************
-	* Zustandsbit für die Regenpumpe setzen
-	*************************************************************************/
-	// Ein/Ausschaltzeiten mit aktuelle Uhrzeit vergleichen
-	
-	for (int i = 0 ; i < regenzeitenanzahl; i++)
-	{
-		uhr* ptr = &regenzeit[i];
-		if(!zustandsbit.pumpe)
-		{
-			if (vergleiche_zeiten(ptr,ptr,&zeit))
-			{
-			regenpumpe_aktivieren(&regenpumpe_einzeit);//zustandsbit.pumpe =1; // Mondlicht ein
-			}
-		}			  
-	}
 }
 /*************************************************************************
  * temperatuen_schalten(..) - Zustandbits für die temperaturgesteuerten
@@ -1236,67 +1095,61 @@ void lampen_schalten(void)
 void temperatuen_schalten(void)
 {
     uint8_t compare_return; // Hilfsvariable für switch case
-	
-	for (i =0; i < 3; i++)
-	{
-		/*************************************************************************
-		*  Zustandsbit für Lüfter schalten
-		*************************************************************************/
-		// Wassertemperatur mit min/max Werten vergleichen
-		compare_return = vergleiche_temperaturen(&luefter.min,&luefter.max,&temperatur[i]); 
-		switch (compare_return)
-		{
-		case 1:
-			zustandsbit.luefter =1; // 1 -> Wasser zu warm Lüfter einschalten
-			break;  
-		case 2:
-			zustandsbit.luefter =0; // 2 -> Wasser zu kalt Lüfter ausschalten
-			break;  
-		case 0:
-			break;	// 0 ->  Wasser noch unterhalb Lüfter Einschalttemperatur -> nichts machen
-		default:
-			break;
-		}
-	   /*************************************************************************
-	   * Zustand für Alarm Vektor schalten
-	   *************************************************************************/
-	   // Wassertemperatur mit min/max Werten vergleichen, Ergebnis !=0 -> Alarm Vektor entsprechend setzen
-	   if(!alarm_vektor)
-	   {
-			compare_return = (vergleiche_temperaturen(&alarm.min,&alarm.max,&temperatur[i])); 
-			switch (compare_return)
-			{
-			case 1: 
-				alarm_vektor = 2; // 1 -> Wasser zu warm, Alarm für Temperatur zu hoch
-				break;  
-			case 2:
-				alarm_vektor = 3; // 2 -> Wasser zu kalt, Alarm für Temperatur zu niedrig
-				break;   
-			case 0:
-				break; // 0 ->  Normale Wassertemperatur -> nichts machen
-			default:
-				break;
-			}
-	   }		
-		/*************************************************************************
-		* Zustandbit für Heizer schalten
-		*************************************************************************/
-		// Wassertemperatur mit min/max Werten vergleichen
-		compare_return = vergleiche_temperaturen(&heizer.max,&heizer.min,&temperatur[0]); 
-		switch (compare_return)
-		{
-		case 1:
-			zustandsbit.heizer =0;
-			break;  // 1 -> Wasser zu warm Heizer ausschalten
-		case 2:
-			zustandsbit.heizer =1;
-			break;  // 2 -> Wasser zu kalt Heizer einschalten
-		case 0:
-			break;	// 0 ->  Wasser noch oberhalb Heizer Einschalttemperatur -> nichts machen
-		default:
-			break;
-		}
-	}	
+
+    /*************************************************************************
+    *  Zustandsbit für Lüfter schalten
+    *************************************************************************/
+	// Wassertemperatur mit min/max Werten vergleichen
+    compare_return = vergleiche_temperaturen(&luefter.min,&luefter.max,&temperatur); 
+    switch (compare_return)
+    {
+    case 1:
+        zustandsbit.luefter =1; // 1 -> Wasser zu warm Lüfter einschalten
+        break;  
+    case 2:
+        zustandsbit.luefter =0; // 2 -> Wasser zu kalt Lüfter ausschalten
+        break;  
+    case 0:
+        break;	// 0 ->  Wasser noch unterhalb Lüfter Einschalttemperatur -> nichts machen
+    default:
+        break;
+    }
+   /*************************************************************************
+   * Zustand für Alarm Vektor schalten
+   *************************************************************************/
+   // Wassertemperatur mit min/max Werten vergleichen, Ergebnis !=0 -> Alarm Vektor entsprechend setzen
+    compare_return = (vergleiche_temperaturen(&alarm.min,&alarm.max,&temperatur)); 
+    switch (compare_return)
+    {
+    case 1: 
+        alarm_vektor = 2; // 1 -> Wasser zu warm, Alarm für Temperatur zu hoch
+        break;  
+    case 2:
+        alarm_vektor = 3; // 2 -> Wasser zu kalt, Alarm für Temperatur zu niedrig
+        break;   
+    case 0:
+        break; // 0 ->  Normale Wassertemperatur -> nichts machen
+    default:
+        break;
+    }
+    /*************************************************************************
+    * Zustandbit für Heizer schalten
+    *************************************************************************/
+	// Wassertemperatur mit min/max Werten vergleichen
+    compare_return = vergleiche_temperaturen(&heizer.max,&heizer.min,&temperatur); 
+    switch (compare_return)
+    {
+    case 1:
+        zustandsbit.heizer =0;
+        break;  // 1 -> Wasser zu warm Heizer ausschalten
+    case 2:
+        zustandsbit.heizer =1;
+        break;  // 2 -> Wasser zu kalt Heizer einschalten
+    case 0:
+        break;	// 0 ->  Wasser noch oberhalb Heizer Einschalttemperatur -> nichts machen
+    default:
+        break;
+    }
 }
 /*************************************************************************
  * ausgaenge_ansteuern(..) - Errechnete Schaltzustände sammeln und 
@@ -1325,7 +1178,7 @@ void ausgaenge_ansteuern(void)
 		if (alarm_vektor) // Wenn ein Alarm anliegt -> Alarmgeber einschalten
 		{
 			ALARMLED_ON;
-			//BUZZER_ON;
+			BUZZER_ON;
 		}
 		else			// Ansonsten Alarmgeber ausschalten
 		{
@@ -1336,39 +1189,31 @@ void ausgaenge_ansteuern(void)
 		*  Sensorwerte für die Tages Max und Min Werte abfragen und entsprechend schreiben
 		*************************************************************************/
 		// Abfrage ober bisherige Max und Min  Temperaturen über/unterschritten 
-		
-		for (i = 0; i < 3; i++)
+		switch (vergleiche_temperaturen(&extrem_temperatur.min_wert,&extrem_temperatur.max_wert,&temperatur))
 		{
-		
-			switch (vergleiche_temperaturen(&extrem_temperatur.min_wert,&extrem_temperatur.max_wert,&temperatur[i]))
-			{
-			case 1:	// 1-> Wasser wärmer als bisherige Max Wert
-				extrem_temperatur.max_wert = temperatur[i];	// Neuer Max Wert
-				extrem_temperatur.max_zeitpunkt = zeit;		// Zeitpunkt mit speichern
-				extrem_temperatur.lm76_nr_max = i;
-		
-				break; 
-			case 2: // 2-> Wasser kälter als bisheriger Min Wert
-				extrem_temperatur.min_wert = temperatur[i];	// Neuer Min Wert
-				extrem_temperatur.min_zeitpunkt = zeit;		// Zeitpunkt mit speichern
-				extrem_temperatur.lm76_nr_min = i;
-				break;  
-			case 0: // Aktuelle Temperatur liegt zwischen den Extremwerten -> nichts machen
-				break;	
-			default:
-				break;
-			}
-		}		
-			// Abfrage ober bisherige Max und Min  ph Werte über/unterschritten 
-		switch (vergleiche_temperaturen((int16_t)&extrem_huminity.min_wert,(int16_t)&extrem_huminity.max_wert,(int16_t)&huminity))
+		case 1:	// 1-> Wasser wärmer als bisherige Max Wert
+			extrem_temperatur.max_wert = temperatur;	// Neuer Max Wert
+			extrem_temperatur.max_zeitpunkt = zeit;		// Zeitpunkt mit speichern
+			break; 
+		case 2: // 2-> Wasser kälter als bisheriger Min Wert
+			extrem_temperatur.min_wert = temperatur;	// Neuer Min Wert
+			extrem_temperatur.min_zeitpunkt = zeit;		// Zeitpunkt mit speichern
+			break;  
+		case 0: // Aktuelle Temperatur liegt zwischen den Extremwerten -> nichts machen
+			break;	
+		default:
+			break;
+		}
+		// Abfrage ober bisherige Max und Min  ph Werte über/unterschritten 
+		switch (vergleiche_temperaturen(&extrem_ph.min_wert,&extrem_ph.max_wert,&ph_wert))
 		{
 		case 1: // ph höher als bisheriger Max Wert
-			extrem_huminity.max_wert = huminity;	// Neuer Max Wert
-			extrem_huminity.max_zeitpunkt = zeit;	// Zeitpunkt mit speichern
+			extrem_ph.max_wert = ph_wert;	// Neuer Max Wert
+			extrem_ph.max_zeitpunkt = zeit;	// Zeitpunkt mit speichern
 			break;  
 		case 2: // pH niedriger als bisheriger Min Wert
-			extrem_huminity.min_wert = huminity;	// Neuer Min Wert
-			extrem_huminity.min_zeitpunkt = zeit;	// Zeitpunkt mit speichern
+			extrem_ph.min_wert = ph_wert;	// Neuer Min Wert
+			extrem_ph.min_zeitpunkt = zeit;	// Zeitpunkt mit speichern
 			break;  
 		case 0: // Aktueller pH Wert liegt zwischen den Extremwerten -> nichts machen
 			break;	
@@ -1398,16 +1243,16 @@ void ausgaenge_ansteuern(void)
 		else PUMPE_OFF;
 }
 /*************************************************************************
- * regenpumpe_aktivieren(..) -  Für Pumpenstopp bei der Fütterung wird ein Counter geladen 
+ * futterstop_aktivieren(..) -  Für Pumpenstopp bei der Fütterung wird ein Counter geladen 
  * welcher über den Timer alle 1 sec dekrementiert wird bis Zeit abgelaufen ist
  * PE:struct uhr * stopp_zeit // Pointer auf Zeit wie lange die Pumpe ausgeschaltet werden soll
  * PA:void
  *************************************************************************/
-void regenpumpe_aktivieren(struct uhr *stopp_zeit)
+void futterstop_aktivieren(struct uhr *stopp_zeit)
 {	
-	// Wenn regenpumpe_einzeit nicht schon aktiviert -> Zeit in Sekunden umrechnen und in die Timervariable schreiben
+	// Wenn Futterstopp nicht schon aktiviert -> Zeit in Sekunden umrechnen und in die Timervariable schreiben
 	if(!timer_counter) timer_counter = ((uint32_t)stopp_zeit->stunde* 3600)+((uint32_t)stopp_zeit->minute * 60)+((uint32_t)stopp_zeit->sekunde); 
-	else timer_counter = 0; // Wenn Pumpen schon angeschaltet -> Pumpe wieder vorzeitig ausschalten
+	else timer_counter = 0; // Wenn Pumpen schon gestoppt -> Pumpe wieder vorzeitig einschalten
 }
 /*************************************************************************
  * read_eeprom_daten(..) - Statische Werte nach einen Reset aus dem EEPROM holen
@@ -1417,7 +1262,7 @@ void read_eeprom_daten(void)
 {	
 	cli();																		// Interrupts global ausschalten
 																				// Da Eeprom operationen zeitkritisch
-    temperatur_offset[0]  = eeprom_read_byte (&temperatur_offset_eeprom[0]); // Temperatur Offset holen
+    temperatur_offset  = (uint8_t)eeprom_read_byte (&temperatur_offset_eeprom); // Temperatur Offset holen
 	mondlicht_helligkeit  = eeprom_read_byte (&mondlicht_helligkeit_eeprom);	// Mondlicht Helligkeit holen
 	eeprom_read_block (&phwert_referenzen, &phwert_referenzen_eeprom, sizeof(struct Ph_reverenz)); // Referenzwerte der PH Werte Berechnung holen
     eeprom_read_block (&lampe_on, &lampe_on_eeprom, sizeof(struct uhr));		// Einschaltzeit  der Lampe holen
@@ -1427,9 +1272,7 @@ void read_eeprom_daten(void)
     eeprom_read_block (&alarm, &alarm_eeprom, sizeof(schalt_werte));			// Schalttemperatur für den Alarm holen
     eeprom_read_block (&heizer, &heizer_eeprom, sizeof(schalt_werte));			// Schalttemperatur für den Heizer holen
     eeprom_read_block (&luefter, &luefter_eeprom, sizeof(schalt_werte));		// Schalttemperatur für den Lüfter holen
-	eeprom_read_block (&regenpumpe_einzeit, &regenpumpe_einzeit_eeprom, sizeof(schalt_werte)); // Schalttemperatur für den Lüfter holen
-	eeprom_read_block (&regenzeit, &regenzeit_eeprom, sizeof(regenzeit)); // Schalttemperatur für den Lüfter holen
-	regenzeitenanzahl  = (uint8_t)eeprom_read_byte (&regenzeitenanzahl_eeprom); // Temperatur Offset holen
+	eeprom_read_block (&futterstopp, &futterstopp_eeprom, sizeof(schalt_werte)); // Schalttemperatur für den Lüfter holen
 	sei();																		// Interrupts global wieder freigeben
 }
 /*************************************************************************
@@ -1456,18 +1299,18 @@ uint8_t zustand_lcd(uint8_t zustand)
  *************************************************************************/
 void send_to_uart(void )
 {
-    temperatur_to_string(temperatur[0],anzeigetext1);	// Temperatur zu String
-	uart_puts(anzeigetext1);						// Temperatur über UART senden
-    uart_putc('\r');								// New Line
-	phwert_to_string(huminity, anzeigetext1);		// Feuchtigkeit zu String		
-    uart_puts(anzeigetext1);						// Feuchtigkeit über UART senden
-    uart_putc('\r');								// New Line
-	zeit_to_string(zeit, anzeigetext1);				// Zeit zu String
-	uart_puts(anzeigetext1);						// Zeit über UART senden
-    uart_putc('\r');								// New Line
-	datum_to_string(zeit, anzeigetext1);			// Datum zu string
-	uart_puts(anzeigetext1);						// Datum über UART senden
-	uart_putc('\r');								// New Line
+    //temperatur_to_string(temperatur,anzeigetext1);	// Temperatur zu String
+	//uart_puts(anzeigetext1);						// Temperatur über UART senden
+    //uart_putc('\r');								// New Line
+	//phwert_to_string(ph_wert, anzeigetext1);		// pH Wert zu String		
+    //uart_puts(anzeigetext1);						// pH Wert über UART senden
+    //uart_putc('\r');								// New Line
+	//zeit_to_string(zeit, anzeigetext1);				// Zeit zu String
+	//uart_puts(anzeigetext1);						// Zeit über UART senden
+    //uart_putc('\r');								// New Line
+	//datum_to_string(zeit, anzeigetext1);			// Datum zu string
+	//uart_puts(anzeigetext1);						// Datum über UART senden
+	//uart_putc('\r');								// New Line
 }
 /*************************************************************************
  * mondlicht_dimmer(..) - Helligkeit des Mondlichts mittels PWM Timer 1B einstellen
@@ -1491,16 +1334,14 @@ void reset_tageswerte(void)
 	
 	if(alter_tag != zeit.tag) // Feststellen ob das Datum des Tages geändert hat
 	{
-		extrem_temperatur.max_wert = temperatur[0];	// Max auf aktuelle Temperatur setzen
-		extrem_temperatur.min_wert = temperatur[0];	// Min auf aktuelle Temperatur setzen
+		extrem_temperatur.max_wert = temperatur;	// Max auf aktuelle Temperatur setzen
+		extrem_temperatur.min_wert = temperatur;	// Min auf aktuelle Temperatur setzen
 		extrem_temperatur.max_zeitpunkt = zeit;		// Zeitpunkt resetten -> ist immer 00:00:00
 		extrem_temperatur.min_zeitpunkt = zeit;		// Zeitpunkt resetten -> ist immer 00:00:00
-		extrem_temperatur.lm76_nr_max = 0;
-		extrem_temperatur.lm76_nr_min = 0;
-		extrem_huminity.max_wert = huminity;				// Max auf aktuellen pH Wert  setzen
-		extrem_huminity.min_wert = huminity;				// Min auf aktuellen pH Wert  setzen
-		extrem_huminity.max_zeitpunkt = zeit;				// Zeitpunkt resetten -> ist immer 00:00:00
-		extrem_huminity.min_zeitpunkt = zeit;				// Zeitpunkt resetten -> ist immer 00:00:00
+		extrem_ph.max_wert = ph_wert;				// Max auf aktuellen pH Wert  setzen
+		extrem_ph.min_wert = ph_wert;				// Min auf aktuellen pH Wert  setzen
+		extrem_ph.max_zeitpunkt = zeit;				// Zeitpunkt resetten -> ist immer 00:00:00
+		extrem_ph.min_zeitpunkt = zeit;				// Zeitpunkt resetten -> ist immer 00:00:00
 		alter_tag = zeit.tag;						// Datum des neuen Tages merken
 	}	
 }
@@ -1516,37 +1357,22 @@ void main_anzeige(void)
 	* Messwerte in Strings umwandeln und auf den LCD anzeigen
 	*************************************************************************/
     lcd_command(LCD_CURSOROFF | LCD_BLINKINGOFF);	// Kein Cursor in der Hauptanzeige
-	memcpy(anzeigetext1, 0x00, strlen(anzeigetext1)+1);
 	zeit_to_string(zeit, anzeigetext1);
     lcd_printlc(1,1,(unsigned char*)anzeigetext1);	// Uhrzeit oben rechts im Display
 	lcd_putchar(' ');								// Abstand zum Wochentag
-	memcpy(anzeigetext, 0x00, strlen(anzeigetext)+1);
     lcd_print(strcpy_P (anzeigetext,wochentagname[zeit.wochentag])); // Wochentag anzeigen
-	memcpy(anzeigetext1, 0x00, strlen(anzeigetext1)+1);
-    temperatur_to_string(temperatur[1],anzeigetext1);	// Aktuelle Temperatur zu String
-    lcd_printlc(2,1,(unsigned char*)"M:");		// Temperatur  Linie 2
+    temperatur_to_string(temperatur,anzeigetext1);	// Aktuelle Temperatur zu String
+    lcd_printlc(2,1,(unsigned char*)"Temp:");		// Temperatur  Linie 2
     lcd_print((unsigned char*) anzeigetext1);		// Temperatur anzeigen
-	memcpy(anzeigetext1, 0x00, strlen(anzeigetext1)+1);
-	temperatur_to_string(temperatur[2],anzeigetext1);	// Aktuelle Temperatur zu String
-    lcd_printlc(2,14,(unsigned char*)"H:");		// Temperatur  Linie 2
-    lcd_print((unsigned char*) anzeigetext1);		// Temperatur anzeigen
-    //lcd_printlc(2,11,(unsigned char*)" Max:");		//  Tagesmaximum Temperatur 3 Linie
-    //temperatur_to_string(extrem_temperatur.max_wert,anzeigetext2);	// Tagesmaximum zu String
-    //lcd_print((unsigned char*) anzeigetext2);		// Tagesmaximum anzeigen
-	lcd_printlc(3,1,(unsigned char*)"Hy:");			// Feuchtigkeit Linie 3
-	memcpy(anzeigetext1, 0x00, strlen(anzeigetext1)+1);
-	sprintf(anzeigetext1, "%02d",huminity);
-	lcd_print(anzeigetext1);						// Feuchtigkeit anzeigen
-	lcd_putchar('%');
-	//sprintf(anzeigetext1, "  %03dB",mem);
-	//lcd_print(anzeigetext1);	
-	memcpy(anzeigetext1, 0x00, strlen(anzeigetext1)+1);
-	temperatur_to_string(temperatur[0],anzeigetext1);	// Aktuelle Temperatur zu String
-    lcd_printlc(3,14,(unsigned char*)"B:");		// Temperatur  Linie 2
-    lcd_print((unsigned char*) anzeigetext1);		// Temperatur anzeigen
-    //lcd_printlrc(3,11,(unsigned char*)" Min:");		// Tagesminimum Temperatur rechts von pH
-    //temperatur_to_string(extrem_temperatur.min_wert,anzeigetext2);	// Tagesminimum zu String
-    //lcd_print((unsigned char*) anzeigetext2);		// Tagesminimum anzeigen	
+    lcd_printlc(2,11,(unsigned char*)" Max:");		//  Tagesmaximum Temperatur 3 Linie
+    temperatur_to_string(extrem_temperatur.max_wert,anzeigetext2);	// Tagesmaximum zu String
+    lcd_print((unsigned char*) anzeigetext2);		// Tagesmaximum anzeigen
+	lcd_printlc(3,1,(unsigned char*)"pH:");			// pH Wert Linie 3
+	phwert_to_string(ph_wert, anzeigetext1);		// ph Wert in String
+	lcd_print(anzeigetext1);						// ph Wert anzeigen
+    lcd_printlrc(3,11,(unsigned char*)" Min:");		// Tagesminimum Temperatur rechts von pH
+    temperatur_to_string(extrem_temperatur.min_wert,anzeigetext2);	// Tagesminimum zu String
+    lcd_print((unsigned char*) anzeigetext2);		// Tagesminimum anzeigen	
 	/*************************************************************************
 	* Zustände der Ausgänge in Linie 4 anzeigen 
 	*'^' entspricht eingeschaltet '_' entspricht ausgeschaltet

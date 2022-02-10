@@ -266,12 +266,6 @@
     <Compile Include="taster_timer.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="uart.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="uart.h">
-      <SubType>compile</SubType>
-    </Compile>
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\AvrGCC.targets" />
 </Project>
