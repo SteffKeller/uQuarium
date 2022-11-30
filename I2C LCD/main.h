@@ -101,11 +101,13 @@ const char alarm_strings [7][9] PROGMEM= {"Alles OK", // Vektor O -> kein Alarm
 
 struct uhr 
 			zeit,		// Aktuelle Uhrzeit
-			lampe_on,	// Einschaltzeit der Aquarium Lampe
-			lampe_off,	// Ausschaltzeit der Aquarium Lampe
+			lampe_on1,	// Einschaltzeit der Aquarium Lampe
+			lampe_off1,	// Ausschaltzeit der Aquarium Lampe
 			ml_on,		// Einschaltzeit des Mondlichts
 			ml_off,		// Ausschaltzeit des Mondlichts
-			futterstopp;// Pumpenstoppzeit für Fütterung
+			futterstopp,// Pumpenstoppzeit für Fütterung
+			lampe_on2,	// Einschaltzeit der Aquarium Lampe
+			lampe_off2;	// Ausschaltzeit der Aquarium Lampe
 
 typedef struct schalt_werte // Schaltwerte für Temperatur
 {
@@ -146,11 +148,15 @@ schalt_werte	heizer_eeprom EEPROM =					{395,370,0};
 schalt_werte	luefter_eeprom EEPROM=					{395,370,0};
 schalt_werte	ph_schalt_werte_eeprom EEPROM =			{542,542,0};
 Ph_reverenz		phwert_referenzen_eeprom EEPROM =		{299,542,666,133,233,140,429463936};
-uhr				lampe_on_eeprom EEPROM=					{0,0,12,0,0,0,0};
-uhr				lampe_off_eeprom EEPROM =				{0,0,12,0,0,0,0};
+uhr				lampe_on_eeprom1 EEPROM=				{0,0,12,0,0,0,0};
+uhr				lampe_off_eeprom1 EEPROM =				{0,0,12,0,0,0,0};
 uhr				ml_on_eeprom EEPROM=					{0,0,12,0,0,0,0};
 uhr				ml_off_eeprom EEPROM=					{0,0,12,0,0,0,0};
 uhr				futterstopp_eeprom EEPROM =				{0,1,0,0,0,0,0};
+uhr				zeit_eeprom EEPROM =					{0,1,0,0,0,0,0};
+uhr				lampe_on_eeprom2 EEPROM=				{0,0,15,0,0,0,0};
+uhr				lampe_off_eeprom2 EEPROM =				{0,0,16,0,0,0,0};
+uhr				dummy_zeit_eeprom EEPROM =				{0,0,16,0,0,0,0};
 
 	
 /*************************************************************************
@@ -293,19 +299,33 @@ void funkt_menu_datum(void);
 *************************************************************************/
 void funkt_menu_uhr(void);
 /*************************************************************************
- * funkt_menu_lampe_ein(..) - Funktionsmenü zur Einstellung der 
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
  * Einschaltzeit für die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
-void funkt_menu_lampe_ein(void);
+void funkt_menu_lampe_ein_am(void);
 /*************************************************************************
- * funkt_menu_lampe_aus(..) - Funktionsmenü zur Einstellung der 
+ * funkt_menu_lampe_aus_am(..) - Funktionsmenü zur Einstellung der 
  * Ausschaltzeit für die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
-void funkt_menu_lampe_aus(void);
+void funkt_menu_lampe_aus_am(void);
+/*************************************************************************
+ * funkt_menu_lampe_ein_pm(..) - Funktionsmenü zur Einstellung der 
+ * Einschaltzeit für die Lampe
+ * PE:void
+ * PA:void
+*************************************************************************/
+void funkt_menu_lampe_ein_pm(void);
+/*************************************************************************
+ * funkt_menu_lampe_aus_pm(..) - Funktionsmenü zur Einstellung der 
+ * Ausschaltzeit für die Lampe
+ * PE:void
+ * PA:void
+*************************************************************************/
+void funkt_menu_lampe_aus_pm(void);
 /*************************************************************************
  * funkt_menu_futterstop(..) - Funktionsmenü zur Einstellung der 
  * Zeit wie lange die Pumpe beim Fütterungsstopp ausgeschaltet werden soll

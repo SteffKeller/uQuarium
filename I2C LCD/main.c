@@ -267,7 +267,6 @@ void phwert_to_string( uint16_t ph_wert, char* temp_buffer)
 {
 	uint16_t ganze_ph; // Hilfsvariable für Zahl vor dem Komma
 	uint16_t zentel_ph; // Hilfsvariable für Zahl hinter dem Komma
-	uint32_t local_ph;
 	
 	ph_wert += 50;							// Auf zehntel runden
 	ganze_ph = ph_wert / 1000;				// umrechnen in ganze Ph
@@ -282,8 +281,6 @@ void phwert_to_string( uint16_t ph_wert, char* temp_buffer)
 void menue_zeiten_einstellen(struct uhr *zeit_pointer, struct uhr *eeprom_write)
 {
     uint8_t display_update =1, cursor_position =0;																// Hilfsvariablen für Menue Navigation
-    uhr temp_zeit;																								// Hilfsstruct Zeit
-    temp_zeit = *zeit_pointer;																					// Aktuelle Zeit temporär speichern
     while(1)																									//State Machine für die Navigation in der Einstellung
     {
         lcd_command(LCD_CURSORON | LCD_BLINKINGON);																// Blinkender Cursor
@@ -295,7 +292,7 @@ void menue_zeiten_einstellen(struct uhr *zeit_pointer, struct uhr *eeprom_write)
         {
             lcd_command(LCD_CURSOROFF | LCD_BLINKINGOFF);
             lcd_command(LCD_CLEAR);
-            if(eeprom_write )
+            if(eeprom_write != NULL)
             {
 				cli(); // Interrupts global ausschalten da EEPROM Zugriffe zeitkritisch
                 eeprom_write_block (zeit_pointer, eeprom_write, sizeof(struct uhr)); // Schalttemperaturen im EEPROM speichern
@@ -598,12 +595,12 @@ void menue_schalttemperaturen_einstellen( unsigned char *text1, unsigned char *t
         {
             if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrückt
             {
-                (schalt_aktuell->max == 600) ? (schalt_aktuell->max =0) : (schalt_aktuell->max++);	// Abfrage ob Minutenüberlauf und dann Wert setzen
+                (schalt_aktuell->max == 600) ? (schalt_aktuell->max =0) : (schalt_aktuell->max += 2);	// Abfrage ob Minutenüberlauf und dann Wert setzen
                 display_update =1;																		// Zeit hat sich geändert
             }
             else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrückt
             {
-                (schalt_aktuell->max== 0) ? (schalt_aktuell->max =600) : (schalt_aktuell->max--);		// Abfrage ob Minutenüberlauf und dann Wert setzen
+                (schalt_aktuell->max== 0) ? (schalt_aktuell->max =600) : (schalt_aktuell->max-= 2);		// Abfrage ob Minutenüberlauf und dann Wert setzen
                 display_update = 1;																		// Zeit hat sich geändert
             }
 			break;
@@ -615,12 +612,12 @@ void menue_schalttemperaturen_einstellen( unsigned char *text1, unsigned char *t
         {
             if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrückt
             {
-                (schalt_aktuell->min == 600) ? (schalt_aktuell->min =0) : (schalt_aktuell->min++);		// Abfrage ob Minutenüberlauf und dann Wert setzen
+                (schalt_aktuell->min == 600) ? (schalt_aktuell->min =0) : (schalt_aktuell->min += 2);		// Abfrage ob Minutenüberlauf und dann Wert setzen
                 display_update =1;																		// Zeit hat sich geändert
             }
             else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrückt
             {
-                (schalt_aktuell->min== 0) ? (schalt_aktuell->min =600) : (schalt_aktuell->min--);		// Abfrage ob Minutenüberlauf und dann Wert setzen
+                (schalt_aktuell->min== 0) ? (schalt_aktuell->min =600) : (schalt_aktuell->min -= 2);		// Abfrage ob Minutenüberlauf und dann Wert setzen
                 display_update = 1;																		// Zeit hat sich geändert
             }
 			break;
@@ -846,32 +843,57 @@ void funkt_menu_uhr(void)
     lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Aktuelle Uhrzeit    eingeben"))); // Menüstring anzeigen
 	// Eigentliches Menü für die Einstellung des Datums mit entsprechenden Übergabewerten aufrufen	
 	// hier wird nichts ins EEPROM geschrieben darum EEPROM Adresse auf 0 -> wird im Menü entsprechend abgefragt
-    menue_zeiten_einstellen(&zeit,0 );
+    menue_zeiten_einstellen(&zeit,NULL );
 }
 /*************************************************************************
- * funkt_menu_lampe_ein(..) - Funktionsmenü zur Einstellung der 
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
  * Einschaltzeit für die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
-void funkt_menu_lampe_ein(void)
+void funkt_menu_lampe_ein_am(void)
 {
     lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit Einstellungen  Lampe einschalten:")));
-    menue_zeiten_einstellen(&lampe_on, &lampe_on_eeprom );
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit AM Einstell.   Lampe einschalten:")));
+    menue_zeiten_einstellen(&lampe_on1, &lampe_on_eeprom1 );
 }
 /*************************************************************************
- * funkt_menu_lampe_aus(..) - Funktionsmenü zur Einstellung der 
+ * funkt_menu_lampe_aus_am(..) - Funktionsmenü zur Einstellung der 
  * Ausschaltzeit für die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
-void funkt_menu_lampe_aus(void)
+void funkt_menu_lampe_aus_am(void)
 {   
     lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit Einstellungen  Lampe ausschalten:"))); // Menüstring anzeigen
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit AM Einstell.   Lampe ausschalten:"))); // Menüstring anzeigen
 	// Eigentliches Menü für die Einstellung der Einschaltzeit der Lampe  mit entsprechenden Übergabewerten aufrufen
-    menue_zeiten_einstellen(&lampe_off, &lampe_off_eeprom );
+    menue_zeiten_einstellen(&lampe_off1, &lampe_off_eeprom1 );
+}
+/*************************************************************************
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
+ * Einschaltzeit für die Lampe
+ * PE:void
+ * PA:void
+*************************************************************************/
+void funkt_menu_lampe_ein_pm(void)
+{
+    lcd_command(LCD_CLEAR);
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit PM Einstell.   Lampe einschalten:")));
+    menue_zeiten_einstellen(&lampe_on2, &lampe_on_eeprom2 );
+}
+/*************************************************************************
+ * funkt_menu_lampe_aus_am(..) - Funktionsmenü zur Einstellung der 
+ * Ausschaltzeit für die Lampe
+ * PE:void
+ * PA:void
+*************************************************************************/
+void funkt_menu_lampe_aus_pm(void)
+{   
+    lcd_command(LCD_CLEAR);
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit PM Einstell.   Lampe ausschalten:"))); // Menüstring anzeigen
+	// Eigentliches Menü für die Einstellung der Einschaltzeit der Lampe  mit entsprechenden Übergabewerten aufrufen
+    menue_zeiten_einstellen(&lampe_off2, &lampe_off_eeprom2 );
 }
 /*************************************************************************
  * funkt_menu_futterstop(..) - Funktionsmenü zur Einstellung der 
@@ -953,7 +975,7 @@ void funkt_menu_about(void)
 	lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("uQuarium Diplomarb.")));
 	lcd_printlrc(2,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Stefan Keller")));
 	lcd_printlrc(3,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("HW M:V1.0 F:V1.0")));
-	lcd_printlrc(4,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("SW:V1.0")));
+	lcd_printlrc(4,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("SW:V1.2")));
 	
 	while (true)
 	{
@@ -1065,7 +1087,7 @@ void lampen_schalten(void)
 	* Zustandsbit für die Lampe setzen
 	*************************************************************************/
 	// Ein/Ausschaltzeiten mit aktuelle Uhrzeit vergleichen
-    if (vergleiche_zeiten(&lampe_on,&lampe_off,&zeit)) 
+    if (vergleiche_zeiten(&lampe_on1,&lampe_off1,&zeit) || vergleiche_zeiten(&lampe_on2,&lampe_off2,&zeit)) 
     {
         zustandsbit.lampe =1; // Lampe ein
     }
@@ -1073,6 +1095,7 @@ void lampen_schalten(void)
     {
         zustandsbit.lampe =0; // Lampe aus
     }
+	
 	/*************************************************************************
 	* Zustandsbit für die Mondlicht setzen
 	*************************************************************************/
@@ -1265,8 +1288,10 @@ void read_eeprom_daten(void)
     temperatur_offset  = (uint8_t)eeprom_read_byte (&temperatur_offset_eeprom); // Temperatur Offset holen
 	mondlicht_helligkeit  = eeprom_read_byte (&mondlicht_helligkeit_eeprom);	// Mondlicht Helligkeit holen
 	eeprom_read_block (&phwert_referenzen, &phwert_referenzen_eeprom, sizeof(struct Ph_reverenz)); // Referenzwerte der PH Werte Berechnung holen
-    eeprom_read_block (&lampe_on, &lampe_on_eeprom, sizeof(struct uhr));		// Einschaltzeit  der Lampe holen
-    eeprom_read_block (&lampe_off, &lampe_off_eeprom, sizeof(struct uhr));		// Ausschaltzeit der Lampe holen
+    eeprom_read_block (&lampe_on1, &lampe_on_eeprom1, sizeof(struct uhr));		// Einschaltzeit  der Lampe holen
+    eeprom_read_block (&lampe_off1, &lampe_off_eeprom1, sizeof(struct uhr));		// Ausschaltzeit der Lampe holen
+	eeprom_read_block (&lampe_on2, &lampe_on_eeprom2, sizeof(struct uhr));		// Einschaltzeit  der Lampe holen
+	eeprom_read_block (&lampe_off2, &lampe_off_eeprom2, sizeof(struct uhr));		// Ausschaltzeit der Lampe holen
     eeprom_read_block (&ml_on, &ml_on_eeprom, sizeof(struct uhr));				// Einschaltzeit des ML holen
     eeprom_read_block (&ml_off, &ml_off_eeprom, sizeof(struct uhr));			// Ausschaltzeit des MK holen
     eeprom_read_block (&alarm, &alarm_eeprom, sizeof(schalt_werte));			// Schalttemperatur für den Alarm holen
@@ -1367,9 +1392,9 @@ void main_anzeige(void)
     lcd_printlc(2,11,(unsigned char*)" Max:");		//  Tagesmaximum Temperatur 3 Linie
     temperatur_to_string(extrem_temperatur.max_wert,anzeigetext2);	// Tagesmaximum zu String
     lcd_print((unsigned char*) anzeigetext2);		// Tagesmaximum anzeigen
-	lcd_printlc(3,1,(unsigned char*)"pH:");			// pH Wert Linie 3
-	phwert_to_string(ph_wert, anzeigetext1);		// ph Wert in String
-	lcd_print(anzeigetext1);						// ph Wert anzeigen
+	//lcd_printlc(3,1,(unsigned char*)"pH:");			// pH Wert Linie 3
+	//phwert_to_string(ph_wert, anzeigetext1);		// ph Wert in String
+	//lcd_print(anzeigetext1);						// ph Wert anzeigen
     lcd_printlrc(3,11,(unsigned char*)" Min:");		// Tagesminimum Temperatur rechts von pH
     temperatur_to_string(extrem_temperatur.min_wert,anzeigetext2);	// Tagesminimum zu String
     lcd_print((unsigned char*) anzeigetext2);		// Tagesminimum anzeigen	

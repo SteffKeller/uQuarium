@@ -322,7 +322,7 @@ bool lcd_putcharlr(unsigned char line, unsigned char row, unsigned char value);	
  \param *string pointer to the string to print
  \return none
  */
-void lcd_print(unsigned char *string);			//-	Print string to cursor position
+void lcd_print(char *string);			//-	Print string to cursor position
 
 /**
  \brief Print string to position

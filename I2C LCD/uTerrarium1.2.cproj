@@ -92,7 +92,7 @@
     <ResetRule>0</ResetRule>
     <eraseonlaunchrule>0</eraseonlaunchrule>
     <EraseKey />
-    <avrtoolserialnumber>BUR183118800</avrtoolserialnumber>
+    <avrtoolserialnumber>BUR221675323</avrtoolserialnumber>
     <avrdeviceexpectedsignature>0x1E960A</avrdeviceexpectedsignature>
     <avrtoolinterfaceclock>200000</avrtoolinterfaceclock>
     <com_atmel_avrdbg_tool_ispmk2>
@@ -128,7 +128,7 @@
         <InterfaceName>JTAG</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.pickit4</ToolType>
-      <ToolNumber>BUR183118800</ToolNumber>
+      <ToolNumber>BUR221675323</ToolNumber>
       <ToolName>MPLAB® PICkit 4</ToolName>
     </com_atmel_avrdbg_tool_pickit4>
   </PropertyGroup>

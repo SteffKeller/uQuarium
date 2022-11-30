@@ -97,12 +97,12 @@ void lcd_print_progmem(unsigned char *string)
     }
 }
 //-	Print string to cursor position
-void lcd_print(unsigned char *string)
+void lcd_print(char *string)
 {
     unsigned char i = 0;
     while(string[i] != 0x00)
     {
-        lcd_putchar(string[i]);
+        lcd_putchar((unsigned char) string[i]);
         i++;
     }
 }
