@@ -6,6 +6,8 @@ adc.c
 
 DS1307.c
 
+hih6131.c
+
 i2clcd.c
 
 i2cmaster.c
@@ -16,7 +18,7 @@ LM76.c
 
 main.c
 
-taster_timer.c
+mem-check.c
 
-uart.c
+taster_timer.c
 

@@ -125,6 +125,7 @@ struct					//Zustandsbits für Ausgänge
     unsigned mondlicht:1;// Mondlicht 
     unsigned run:1;		// Run oder Wartungsmode
 	unsigned pumpe:1;	// Aquarium Pumpe
+	unsigned esc_alarm:1;	// Aquarium Pumpe
 
 } zustandsbit;
 

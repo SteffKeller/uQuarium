@@ -22,5 +22,3 @@ mem-check.c
 
 taster_timer.c
 
-uart.c
-

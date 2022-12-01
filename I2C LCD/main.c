@@ -46,6 +46,8 @@ int main(void)
 	extrem_ph.min_wert = ph_wert;
 	zustandsbit.run = 1;		// Steuerung in Run Mode
 	zustandsbit.pumpe = 1;		// Pumpe eingeschaltet
+	zustandsbit.esc_alarm = 0;		// Pumpe eingeschaltet
+	
     /*************************************************************************
     * Menü initialisieren
     *************************************************************************/
@@ -123,7 +125,17 @@ int main(void)
 		*************************************************************************/
 		if(get_key_press(1<<KEY_ESC))
 		{
-			if(lichtaus < LCDBACKLIGHT_ON_ZEIT) alarm_vektor = 0; // Backlight eingeschaltet? Alarm Vektor löschen
+			if(alarm_vektor != 0 && zustandsbit.esc_alarm == 0)
+			{
+				zustandsbit.esc_alarm =1;
+			} 
+			
+			else if(alarm_vektor != 0  && zustandsbit.esc_alarm == 1)
+			{	
+				zustandsbit.esc_alarm= 0;
+				if(lichtaus < LCDBACKLIGHT_ON_ZEIT) alarm_vektor = 0; // Backlight eingeschaltet? Alarm Vektor löschen
+
+			}
 			lcd_backlight(ON);	// Backlight ein
 			lichtaus = 0;		// Counter für Backlight resetten
 		}	
@@ -1200,8 +1212,15 @@ void ausgaenge_ansteuern(void)
 		
 		if (alarm_vektor) // Wenn ein Alarm anliegt -> Alarmgeber einschalten
 		{
+			if(zustandsbit.esc_alarm == 1)
+			{
+				BUZZER_OFF;
+			}
+			else
+			{
+				BUZZER_ON;		
+			}
 			ALARMLED_ON;
-			BUZZER_ON;
 		}
 		else			// Ansonsten Alarmgeber ausschalten
 		{

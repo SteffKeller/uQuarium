@@ -46,8 +46,7 @@ C_SRCS +=  \
 ../LM76.c \
 ../main.c \
 ../mem-check.c \
-../taster_timer.c \
-../uart.c
+../taster_timer.c
 
 
 PREPROCESSING_SRCS += 
@@ -66,8 +65,7 @@ lcdmenu.o \
 LM76.o \
 main.o \
 mem-check.o \
-taster_timer.o \
-uart.o
+taster_timer.o
 
 OBJS_AS_ARGS +=  \
 adc.o \
@@ -79,8 +77,7 @@ lcdmenu.o \
 LM76.o \
 main.o \
 mem-check.o \
-taster_timer.o \
-uart.o
+taster_timer.o
 
 C_DEPS +=  \
 adc.d \
@@ -92,8 +89,7 @@ lcdmenu.d \
 LM76.d \
 main.d \
 mem-check.d \
-taster_timer.d \
-uart.d
+taster_timer.d
 
 C_DEPS_AS_ARGS +=  \
 adc.d \
@@ -105,8 +101,7 @@ lcdmenu.d \
 LM76.d \
 main.d \
 mem-check.d \
-taster_timer.d \
-uart.d
+taster_timer.d
 
 OUTPUT_FILE_PATH +=uQuarium.elf
 
@@ -186,13 +181,6 @@ LINKER_SCRIPT_DEP+=
 	
 
 ./taster_timer.o: .././taster_timer.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 5.4.0
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\include"  -Os -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atmega644p -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\gcc\dev\atmega644p" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-./uart.o: .././uart.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 5.4.0
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\include"  -Os -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -g3 -Wall -mmcu=atmega644p -B "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.3.300\gcc\dev\atmega644p" -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

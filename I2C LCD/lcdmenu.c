@@ -104,7 +104,7 @@ Menu_Entry Menu2[3] = {
 			{22, menu_has_function, sizeof (Menu2) / sizeof (Menu2[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str22, (FuncPtr)funkt_menu_futterstop}
 };
 // Licht Menü
-Menu_Entry Menu3[5] = {
+Menu_Entry Menu3[7] = {
             {30, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str30, (FuncPtr)funkt_menu_lampe_ein_am},
             {31, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str31, (FuncPtr)funkt_menu_lampe_aus_am},
 			{32, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str35, (FuncPtr)funkt_menu_lampe_ein_pm},
