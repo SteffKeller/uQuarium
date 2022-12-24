@@ -1,6 +1,6 @@
 /************************************************************************
  * Titel :		main.c
- * Projekt:		Diplomarbeit Aquariumsteuerung µQuarium
+ * Projekt:		Diplomarbeit Aquariumsteuerung ï¿½Quarium
  * Funktion:	Hauptprogramm der Steuerung
  * Autor :		Stefan Keller
  * Lehrgang:	Techniker HF ET 08-11 Klasse A
@@ -28,100 +28,100 @@ int main(void)
     i2c_init();					// I2C-Bus initialisieren
     ds_1307_init();				// DS1307 initialisieren
     lcd_init();					// LCD initialisieren
-    init_ports();				// Ports Ein-Ausgänge initialisieren
+    init_ports();				// Ports Ein-Ausgï¿½nge initialisieren
 	adc_init();					// AD-Wandler initialisieren
-    //uart_init( UART_BAUD_SELECT(UART_BAUD_RATE,F_CPU) ); // UART für RS232 initialisieren
+    //uart_init( UART_BAUD_SELECT(UART_BAUD_RATE,F_CPU) ); // UART fï¿½r RS232 initialisieren
     sei();						// Global Interrupt freigeben
 	/*************************************************************************
 	* Sensorwerte erstes mal auslesen und Anfangswerte der Variablen setzen
 	*************************************************************************/
-    _delay_ms(1000);            // 1s warten, um LM76 genügend zeit zu geben die erste Temperatur zu berechnen
+    _delay_ms(1000);            // 1s warten, um LM76 genï¿½gend zeit zu geben die erste Temperatur zu berechnen
 	wdt_enable(WDTO_1S);		// Watchdog aktivieren -> Timer 1s
-    temperatur = get_lm76_temperatur(LM76_ADRESSE)+ temperatur_offset; // Erstes mal die Temperatur vom LM76 holen, so das die Ausgänge von anfang an richtig gesetzt werden
-    get_ds1307_zeit_datum(&zeit);// Erstes mal die Zeit vom DS1307 holen, so das die Ausgänge von anfang an richtig gesetzt werden
-	ph_wert = read_phwert(&phwert_referenzen); // Erstes mal den pH Wert einlesen, so das die Ausgänge von anfang an richtig gesetzt werden
+    temperatur = get_lm76_temperatur(LM76_ADRESSE)+ temperatur_offset; // Erstes mal die Temperatur vom LM76 holen, so das die Ausgï¿½nge von anfang an richtig gesetzt werden
+    get_ds1307_zeit_datum(&zeit);// Erstes mal die Zeit vom DS1307 holen, so das die Ausgï¿½nge von anfang an richtig gesetzt werden
+	ph_wert = read_phwert(&phwert_referenzen); // Erstes mal den pH Wert einlesen, so das die Ausgï¿½nge von anfang an richtig gesetzt werden
     extrem_temperatur.max_wert = temperatur; // Tages Min/Max Werte auf aktuelle Temperatur setzen
     extrem_temperatur.min_wert = temperatur;
 	extrem_ph.max_wert = ph_wert;			 // Tages Min/Max Werte auf aktuellen pH Wert setzen
 	extrem_ph.min_wert = ph_wert;
 	zustandsbit.run = 1;		// Steuerung in Run Mode
-	zustandsbit.pumpe = 1;		// Pumpe eingeschaltet
+	zustandsbit.pumpe = 0;		// Pumpe eingeschaltet
 	zustandsbit.esc_alarm = 0;		// Pumpe eingeschaltet
 	
     /*************************************************************************
-    * Menü initialisieren
+    * Menï¿½ initialisieren
     *************************************************************************/
-    init_menu();				// Menü Struktur initialisieren
-    menu(5);					// Hauptmenü laden
+    init_menu();				// Menï¿½ Struktur initialisieren
+    menu(5);					// Hauptmenï¿½ laden
 	/*************************************************************************
 	* LCD einschalten
 	*************************************************************************/
-    lcd_command(LCD_CLEAR);     // LCD-Anzeige löschen
+    lcd_command(LCD_CLEAR);     // LCD-Anzeige lï¿½schen
     lcd_backlight(ON);			// LCD-Hintergrundbeleuchtung an
     lcd_command(LCD_CURSOROFF); // LCD-Cursor off
 	static uint8_t lichtaus= 0;
 	/*************************************************************************
-	* Main Schleife -> In dieser läuft das ganze Programm ab
+	* Main Schleife -> In dieser lï¿½uft das ganze Programm ab
 	*************************************************************************/
     while (true) 
     {	
 		wdt_reset();	// Watchdog bei jedem Durchlauf resetten
 		main_anzeige(); //Hauptbildschirm anzeigen
 		/*************************************************************************
-		* Taste OK gedrückt ->Menü aufrufen und darin navigieren und 
+		* Taste OK gedrï¿½ckt ->Menï¿½ aufrufen und darin navigieren und 
 		* Einstellungen vornehmen
 		*************************************************************************/
-		if (get_key_press(1<<KEY_OK)) // Wenn Taste OK gedrückt -> Hauptmenü anzeigen
+		if (get_key_press(1<<KEY_OK)) // Wenn Taste OK gedrï¿½ckt -> Hauptmenï¿½ anzeigen
 		{
-			wdt_disable(); // Im Menü ist der Watchdog nicht aktiv, da in den Routinen auf Tasteneingaben gewartet werden muss 
-			lcd_command(LCD_CLEAR); // LCD löschen
+			wdt_disable(); // Im Menï¿½ ist der Watchdog nicht aktiv, da in den Routinen auf Tasteneingaben gewartet werden muss 
+			lcd_command(LCD_CLEAR); // LCD lï¿½schen
 			lcd_backlight(ON);		// Backlight ein
-			displayMenu();          // Hauptmenü anzeigen
-			while(true)				// Auf Tasteneingaben warten und Menübaum aktualisieren
+			displayMenu();          // Hauptmenï¿½ anzeigen
+			while(true)				// Auf Tasteneingaben warten und Menï¿½baum aktualisieren
 			{
-				if(get_key_press(1<<KEY_UP))		menu(KEY_UP);// Im Menübaum eine Stelle nach oben
-				else if(get_key_press(1<<KEY_LEFT)) menu(KEY_LEFT);// Vorheriges Menü anzeigen
-				else if(get_key_press(1<<KEY_OK))	menu(KEY_OK);// Untermenü oder Funktion aufrufen
-				else if(get_key_press(1<<KEY_RIGHT))menu(KEY_RIGHT);// Untermenü oder Funktion aufrufen
-				else if(get_key_press(1<<KEY_DOWN)) menu(KEY_DOWN);// Im Menübaum eine Stelle nach unten
-				else if(get_key_press(1<<KEY_ESC))			// Menü verlassen -> Hauptbildschirm anzeigen
+				if(get_key_press(1<<KEY_UP))		menu(KEY_UP);// Im Menï¿½baum eine Stelle nach oben
+				else if(get_key_press(1<<KEY_LEFT)) menu(KEY_LEFT);// Vorheriges Menï¿½ anzeigen
+				else if(get_key_press(1<<KEY_OK))	menu(KEY_OK);// Untermenï¿½ oder Funktion aufrufen
+				else if(get_key_press(1<<KEY_RIGHT))menu(KEY_RIGHT);// Untermenï¿½ oder Funktion aufrufen
+				else if(get_key_press(1<<KEY_DOWN)) menu(KEY_DOWN);// Im Menï¿½baum eine Stelle nach unten
+				else if(get_key_press(1<<KEY_ESC))			// Menï¿½ verlassen -> Hauptbildschirm anzeigen
 				{
 					wdt_enable(WDTO_1S);					// Watchdog einschalten
-					menu(KEY_ESC);							// Hauptmenü 
-					lcd_command(LCD_CLEAR);					// LCD löschen
-					lichtaus = 0;							// Counter für Backlight resetten
-					break;									// Menüschleife verlassen
+					menu(KEY_ESC);							// Hauptmenï¿½ 
+					lcd_command(LCD_CLEAR);					// LCD lï¿½schen
+					lichtaus = 0;							// Counter fï¿½r Backlight resetten
+					break;									// Menï¿½schleife verlassen
 				}				 
-				displayMenu();								// aktuelles Menü anzeigen
+				displayMenu();								// aktuelles Menï¿½ anzeigen
 			}
 		}
 		/*************************************************************************
 		* Auf Tasteneingaben in der Hauptanzeige warten, 
-		* wird irgendeine Taste gedrückt -> Backlight ein
+		* wird irgendeine Taste gedrï¿½ckt -> Backlight ein
 		*************************************************************************/
 		/*************************************************************************
-		* Taste RUN gedrückt -> Steuerung zwischen Run und Wartungsmodus umschalten
+		* Taste RUN gedrï¿½ckt -> Steuerung zwischen Run und Wartungsmodus umschalten
 		*************************************************************************/
 		if(get_key_press(1<<KEY_RUN))
 		{
 			zustandsbit.run ^= 1;	// Steuerung Run oder Wartungs Mode
 			lcd_backlight(ON);		// Backlight ein
-			lichtaus = 0;			// Counter für Backlight resetten
+			lichtaus = 0;			// Counter fï¿½r Backlight resetten
 
 		}	
 		/*************************************************************************
-		* Taste F gedrückt -> Pumpe ausschalten für Fütterung 
+		* Taste F gedrï¿½ckt -> Pumpe ausschalten fï¿½r Fï¿½tterung 
 		*************************************************************************/
 		if(get_key_press(1<<KEY_F))
 		{
 			futterstop_aktivieren(&futterstopp);
 			lcd_backlight(ON);	// Backlight ein
-			lichtaus = 0;		// Counter für Backlight resetten
+			lichtaus = 0;		// Counter fï¿½r Backlight resetten
 		}
 		/*************************************************************************
-		* Taste ESC gedrückt und Backlight ein -> Alarm löschen
-		* Wenn Backlight aus -> Alarm nicht löschen, so kann der Alarm auch im 
-		* Dunkeln überprüft werden
+		* Taste ESC gedrï¿½ckt und Backlight ein -> Alarm lï¿½schen
+		* Wenn Backlight aus -> Alarm nicht lï¿½schen, so kann der Alarm auch im 
+		* Dunkeln ï¿½berprï¿½ft werden
 		*************************************************************************/
 		if(get_key_press(1<<KEY_ESC))
 		{
@@ -133,56 +133,56 @@ int main(void)
 			else if(alarm_vektor != 0  && zustandsbit.esc_alarm == 1)
 			{	
 				zustandsbit.esc_alarm= 0;
-				if(lichtaus < LCDBACKLIGHT_ON_ZEIT) alarm_vektor = 0; // Backlight eingeschaltet? Alarm Vektor löschen
+				if(lichtaus < LCDBACKLIGHT_ON_ZEIT) alarm_vektor = 0; // Backlight eingeschaltet? Alarm Vektor lï¿½schen
 
 			}
 			lcd_backlight(ON);	// Backlight ein
-			lichtaus = 0;		// Counter für Backlight resetten
+			lichtaus = 0;		// Counter fï¿½r Backlight resetten
 		}	
 		/*************************************************************************
-		* Falls eine der anderen Tasten gedrückt -> Backlight ein
+		* Falls eine der anderen Tasten gedrï¿½ckt -> Backlight ein
 		*************************************************************************/	
 		if(get_key_press(1<<KEY_UP | 1<<KEY_DOWN | 1<<KEY_LEFT | 1<<KEY_RIGHT | 1<<KEY_ESC))
 		{
 			
 			lcd_backlight(ON);	// Backlight ein
-			lichtaus = 0;		// Counter für Backlight resetten
+			lichtaus = 0;		// Counter fï¿½r Backlight resetten
 		}
 		/*************************************************************************
-		* Sensorwerte einlesen und Ausgänge ansteuern
+		* Sensorwerte einlesen und Ausgï¿½nge ansteuern
 		*************************************************************************/
 		/*************************************************************************
-		* Alle 0.5 sec wird die Zeit eingelesen und die Ausgänge
+		* Alle 0.5 sec wird die Zeit eingelesen und die Ausgï¿½nge
 		* angesteuert
 		*************************************************************************/			
 		if (messflag_05s) // Wenn 0.5s vorbei, wird durch Timerinterrupt gesteuert
         {
-            messflag_05s =0;				// ISR Flag zurücksetzen
+            messflag_05s =0;				// ISR Flag zurï¿½cksetzen
             get_ds1307_zeit_datum(&zeit);	// Zeit vom DS1307 holen;
-            lampen_schalten(); 				// Lampen Ausgänge ansteuern	
-			reset_tageswerte(); // Um Mitternacht Tages Min- und Maxwerte löschen
-			if (timer_counter)				// Pumpenstopp aktiv
-			{
-				zustandsbit.pumpe = 0;		// Zustandsbit für Pumpe ein
-			}
-			else zustandsbit.pumpe = 1;		// Zustandsbit für Pumpe aus
+            lampen_schalten(); 				// Lampen Ausgï¿½nge ansteuern	
+			reset_tageswerte(); // Um Mitternacht Tages Min- und Maxwerte lï¿½schen
+			//if (timer_counter)				// Pumpenstopp aktiv
+			//{
+			//	zustandsbit.pumpe = 0;		// Zustandsbit fï¿½r Pumpe ein
+			//}
+			//else zustandsbit.pumpe = 1;		// Zustandsbit fï¿½r Pumpe aus
 			ausgaenge_ansteuern();	
 			
         }
 		/*************************************************************************
 		* Alle 1 sec werden die Temperatur und der pH Wert eingelesen 
 		* die Zustandsbits entsprechend gesetzt, die aktuellen Werte per UART
-		* gesendet und überprüft ob das Backlight ausgeschaltet werden muss
+		* gesendet und ï¿½berprï¿½ft ob das Backlight ausgeschaltet werden muss
 		*************************************************************************/	
         if (messflag_1s) // Wenn 1s vorbei, wird durch Timerinterrupt gesteuert 
         {
-            messflag_1s =0;								// ISR Flag zurücksetzen
+            messflag_1s =0;								// ISR Flag zurï¿½cksetzen
             temperatur = get_lm76_temperatur_4x(LM76_ADRESSE)+ temperatur_offset; // Temperatur vom LM76 holen und Offset addieren;
-			ph_wert = read_phwert(&phwert_referenzen);	// pH Wert über ADC holen 
-            temperatuen_schalten();						// Zustandsbit für Temperatur gesteuerte Ausgänge schalten
-			//send_to_uart();								// aktuelle Werte über UART senden
-			if(lichtaus > LCDBACKLIGHT_ON_ZEIT) lcd_backlight(OFF);	// überprüfen ob Zeit für Backlight in abgelaufen		
-			else lichtaus++;							// ansonsten Variable für Backlight inkrementieren
+			ph_wert = read_phwert(&phwert_referenzen);	// pH Wert ï¿½ber ADC holen 
+            temperatuen_schalten();						// Zustandsbit fï¿½r Temperatur gesteuerte Ausgï¿½nge schalten
+			//send_to_uart();								// aktuelle Werte ï¿½ber UART senden
+			if(lichtaus > LCDBACKLIGHT_ON_ZEIT) lcd_backlight(OFF);	// ï¿½berprï¿½fen ob Zeit fï¿½r Backlight in abgelaufen		
+			else lichtaus++;							// ansonsten Variable fï¿½r Backlight inkrementieren
 		}        
     }
 }
@@ -193,12 +193,12 @@ int main(void)
  *************************************************************************/
 void timer_init(void)
 {
-	//Timer 0 für Tastenentprellen und zeitgesteuertes Einlesen der Messwerte 
+	//Timer 0 fï¿½r Tastenentprellen und zeitgesteuertes Einlesen der Messwerte 
 	TCCR0B |= (1<<CS00)|(1<<CS02);		// Clock/1024 ergibt Timerfrequenz von 15625 Hz
     TIMSK0 |= 1<<TOIE0;					// Timer 0 Interrupt einschalten
-	//Timer 1B für PWM Mondlicht
-	TCCR1A = (1<<COM1B1) | (1<<WGM10);	// PWM-Mode 1,  8Bit PWM zählt bis 255, Phasenkorrekt
-	TCCR1B = (1<<CS10) | (1<<CS11);		// Clock/64 -> + zählen bis 255 ergibt PWM-Frequenz von 490Hz
+	//Timer 1B fï¿½r PWM Mondlicht
+	TCCR1A = (1<<COM1B1) | (1<<WGM10);	// PWM-Mode 1,  8Bit PWM zï¿½hlt bis 255, Phasenkorrekt
+	TCCR1B = (1<<CS10) | (1<<CS11);		// Clock/64 -> + zï¿½hlen bis 255 ergibt PWM-Frequenz von 490Hz
 	
     sei(); //Timer global freigeben
 }
@@ -232,14 +232,14 @@ void temperatur_to_string(int16_t aktuelle_temperatur, char* temp_buffer)
     zehntel_grad = ((string_temperatur % 10000) /1000);	// umrechnen der zehntel Grad
 
 	/*************************************************************************
-	* Routine um Minus Temperaturen richtig auf dem Display anzeigen zu können 
+	* Routine um Minus Temperaturen richtig auf dem Display anzeigen zu kï¿½nnen 
 	* falls Temperatur oder Hysterese unter Null
 	*************************************************************************/
     if(zehntel_grad < 0)
     {
         zehntel_grad = 0 -zehntel_grad; // Wert positiv machen -> oder auch Minus abschneiden
 
-        if (ganze_grad == 0) // Falls die Vorkommastelle 0 ist -> Minus an Anfang des Strings anhängen, da sprintf das nicht automatisch macht
+        if (ganze_grad == 0) // Falls die Vorkommastelle 0 ist -> Minus an Anfang des Strings anhï¿½ngen, da sprintf das nicht automatisch macht
         {
             sprintf(temp_buffer,"-%i.%iC", ganze_grad, zehntel_grad); // String mit extra Minus Zeichen zusammensetzen
         }
@@ -270,20 +270,20 @@ void datum_to_string( struct uhr ausgabe_datum,char* temp_buffer)
 	sprintf(temp_buffer, "%02d.%02d.%02d", ausgabe_datum.tag, ausgabe_datum.monat, ausgabe_datum.jahr);	
 }
 /*************************************************************************
- * phwert_to_string(..) - PH-Wert in Form von 7000 in Kommazahl 7.0 umwandeln für die LCD Ausgabe
+ * phwert_to_string(..) - PH-Wert in Form von 7000 in Kommazahl 7.0 umwandeln fï¿½r die LCD Ausgabe
  * PE:uint16_t ph_wert // Aktueller Ph-Wert 7000 entspricht Ph 7.0 
  * PE:char * temp_buffer // Pointer auf Ausgabestring
  * PA:void
  *************************************************************************/
 void phwert_to_string( uint16_t ph_wert, char* temp_buffer)
 {
-	uint16_t ganze_ph; // Hilfsvariable für Zahl vor dem Komma
-	uint16_t zentel_ph; // Hilfsvariable für Zahl hinter dem Komma
+	uint16_t ganze_ph; // Hilfsvariable fï¿½r Zahl vor dem Komma
+	uint16_t zentel_ph; // Hilfsvariable fï¿½r Zahl hinter dem Komma
 	
 	ph_wert += 50;							// Auf zehntel runden
 	ganze_ph = ph_wert / 1000;				// umrechnen in ganze Ph
     zentel_ph = ((ph_wert % 1000) /100);	// umrechnen der zehntel Ph
-    sprintf(temp_buffer,"%u.%u ", ganze_ph, zentel_ph); // String für den Ph Wert zusammensetzen
+    sprintf(temp_buffer,"%u.%u ", ganze_ph, zentel_ph); // String fï¿½r den Ph Wert zusammensetzen
 }
 /*************************************************************************
  * menue_zeiten_einstellen(..) - Uhr und Schaltzeiten einstellen und speichern
@@ -292,15 +292,15 @@ void phwert_to_string( uint16_t ph_wert, char* temp_buffer)
  *************************************************************************/
 void menue_zeiten_einstellen(struct uhr *zeit_pointer, struct uhr *eeprom_write)
 {
-    uint8_t display_update =1, cursor_position =0;																// Hilfsvariablen für Menue Navigation
-    while(1)																									//State Machine für die Navigation in der Einstellung
+    uint8_t display_update =1, cursor_position =0;																// Hilfsvariablen fï¿½r Menue Navigation
+    while(1)																									//State Machine fï¿½r die Navigation in der Einstellung
     {
         lcd_command(LCD_CURSORON | LCD_BLINKINGON);																// Blinkender Cursor
-        lcd_gotolr(3,(2+(cursor_position*3)));																	// Cursor Position auf gewählte Zeit
-        if (get_key_short(1<<KEY_RIGHT)) (cursor_position==2) ? (cursor_position = 0) : (cursor_position++);	// nächste Einstellung
+        lcd_gotolr(3,(2+(cursor_position*3)));																	// Cursor Position auf gewï¿½hlte Zeit
+        if (get_key_short(1<<KEY_RIGHT)) (cursor_position==2) ? (cursor_position = 0) : (cursor_position++);	// nï¿½chste Einstellung
         else if (get_key_short(1<<KEY_LEFT)) (cursor_position==0) ? (cursor_position = 2) : (cursor_position--);// vorherige Einstellung
         else if(get_key_press(1<<KEY_ESC)) break;	// Funktion verlassen ohne zu speichern
-        else if(get_key_press(1<<KEY_OK)) // Bestätigen und Werte abspeichern
+        else if(get_key_press(1<<KEY_OK)) // Bestï¿½tigen und Werte abspeichern
         {
             lcd_command(LCD_CURSOROFF | LCD_BLINKINGOFF);
             lcd_command(LCD_CLEAR);
@@ -313,65 +313,65 @@ void menue_zeiten_einstellen(struct uhr *zeit_pointer, struct uhr *eeprom_write)
             else set_ds1307_zeit(zeit_pointer);  // Zeit auf DS1307 schreiben
             lcd_printlc(1,1,(unsigned char*) "Speichere Daten");
             _delay_ms(500);
-            lcd_command(LCD_CLEAR); // LCD Anzeige löschen
+            lcd_command(LCD_CLEAR); // LCD Anzeige lï¿½schen
             break;
         }
-        if(display_update)  // Wenn sich die Zeit geändert hat
+        if(display_update)  // Wenn sich die Zeit geï¿½ndert hat
         {
             display_update =0;  //
 			zeit_to_string(*zeit_pointer, anzeigetext1); 	// Zeit in ASCII umwandeln
             lcd_printlr(3,1,(unsigned char*)anzeigetext1);																// Zeit ausgeben
         }
-        switch (cursor_position) // Anwahl der welche Zeiteinstellung geändert werden soll -> Stunden, Minuten oder Sekunden
+        switch (cursor_position) // Anwahl der welche Zeiteinstellung geï¿½ndert werden soll -> Stunden, Minuten oder Sekunden
         {
 		/*************************************************************************
-		* Stunde wird geändert
+		* Stunde wird geï¿½ndert
 		*************************************************************************/
         case 0:	 
         {
-            if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrückt
+            if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrï¿½ckt
             {
-                (zeit_pointer->stunde == 23) ? (zeit_pointer->stunde =0) : (zeit_pointer->stunde++);	//Abfrage ob Stundenüberlauf und dann Wert setzen
-                display_update = 1;																		// Zeit hat sich geändert
+                (zeit_pointer->stunde == 23) ? (zeit_pointer->stunde =0) : (zeit_pointer->stunde++);	//Abfrage ob Stundenï¿½berlauf und dann Wert setzen
+                display_update = 1;																		// Zeit hat sich geï¿½ndert
             }
-            else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrückt
+            else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrï¿½ckt
             {
-                (zeit_pointer->stunde == 0) ? (zeit_pointer->stunde =23) : (zeit_pointer->stunde--);	//Abfrage ob Stundenüberlauf und dann Wert setzen
-                display_update = 1;																		// Zeit hat sich geändert
+                (zeit_pointer->stunde == 0) ? (zeit_pointer->stunde =23) : (zeit_pointer->stunde--);	//Abfrage ob Stundenï¿½berlauf und dann Wert setzen
+                display_update = 1;																		// Zeit hat sich geï¿½ndert
             }
             break;
         }
 		/*************************************************************************
-		* Minuten werden geändert
+		* Minuten werden geï¿½ndert
 		*************************************************************************/
         case 1:  
         {
-            if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrückt
+            if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrï¿½ckt
             {
-                (zeit_pointer->minute == 59) ? (zeit_pointer->minute =0) : (zeit_pointer->minute++);	// Abfrage ob Minutenüberlauf und dann Wert setzen
-                display_update =1;																		// Zeit hat sich geändert
+                (zeit_pointer->minute == 59) ? (zeit_pointer->minute =0) : (zeit_pointer->minute++);	// Abfrage ob Minutenï¿½berlauf und dann Wert setzen
+                display_update =1;																		// Zeit hat sich geï¿½ndert
             }
-            else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrückt
+            else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrï¿½ckt
             {
-                (zeit_pointer->minute== 0) ? (zeit_pointer->minute =59) : (zeit_pointer->minute--);		// Abfrage ob Minutenüberlauf und dann Wert setzen
-                display_update = 1;																		// Zeit hat sich geändert
+                (zeit_pointer->minute== 0) ? (zeit_pointer->minute =59) : (zeit_pointer->minute--);		// Abfrage ob Minutenï¿½berlauf und dann Wert setzen
+                display_update = 1;																		// Zeit hat sich geï¿½ndert
             }
             break;
         }
 		/*************************************************************************
-		* Sekunden werden geändert
+		* Sekunden werden geï¿½ndert
 		*************************************************************************/
         case 2: 
         {
-            if ( get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrückt
+            if ( get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrï¿½ckt
             {
-                (zeit_pointer->sekunde == 59) ? (zeit_pointer->sekunde =0) : (zeit_pointer->sekunde++); // Abfrage ob Sekundenüberlauf und dann Wert setzen
-                display_update =1;																		// Zeit hat sich geändert
+                (zeit_pointer->sekunde == 59) ? (zeit_pointer->sekunde =0) : (zeit_pointer->sekunde++); // Abfrage ob Sekundenï¿½berlauf und dann Wert setzen
+                display_update =1;																		// Zeit hat sich geï¿½ndert
             }
-            if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))								// Taste DOWN gedrückt
+            if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))								// Taste DOWN gedrï¿½ckt
             {
-                (zeit_pointer->sekunde == 0) ? (zeit_pointer->sekunde =59) : (zeit_pointer->sekunde--); // Abfrage ob Sekundenüberlauf und dann Wert setzen
-                display_update = 1;																		// Zeit hat sich geändert
+                (zeit_pointer->sekunde == 0) ? (zeit_pointer->sekunde =59) : (zeit_pointer->sekunde--); // Abfrage ob Sekundenï¿½berlauf und dann Wert setzen
+                display_update = 1;																		// Zeit hat sich geï¿½ndert
             }
             break;
         }
@@ -379,7 +379,7 @@ void menue_zeiten_einstellen(struct uhr *zeit_pointer, struct uhr *eeprom_write)
             break;
         }
     }
-    lcd_command(LCD_CLEAR);	// LCD Anzeige löschen
+    lcd_command(LCD_CLEAR);	// LCD Anzeige lï¿½schen
 }
 /*************************************************************************
  * menue_datum_einstellen(..) - Datum einstellen und speichern
@@ -392,26 +392,26 @@ void menue_datum_einstellen( struct uhr *datum_pointer)
 
     lcd_command(LCD_CURSORON | LCD_BLINKINGON);
 
-    while(1)																					//State Machine für die Navigation in der Einstellung
+    while(1)																					//State Machine fï¿½r die Navigation in der Einstellung
     {
-        lcd_gotolr(3,(2+(cursor_position*3)));																		// Cursor Position auf gewählte Einstellung
-        if (get_key_short(1<<KEY_RIGHT)) (cursor_position==3) ? (cursor_position = 0) : (cursor_position++);		// nächste Einstellung
+        lcd_gotolr(3,(2+(cursor_position*3)));																		// Cursor Position auf gewï¿½hlte Einstellung
+        if (get_key_short(1<<KEY_RIGHT)) (cursor_position==3) ? (cursor_position = 0) : (cursor_position++);		// nï¿½chste Einstellung
         else if (get_key_short(1<<KEY_LEFT)) (cursor_position==0) ? (cursor_position = 3) : (cursor_position--);	// vorherige Einstellung
         else if(get_key_press(1<<KEY_ESC)) break;	// Funktion verlassen ohne zu speichern
-        else if(get_key_press(1<<KEY_OK)) // Bestätigen und Werte abspeichern
+        else if(get_key_press(1<<KEY_OK)) // Bestï¿½tigen und Werte abspeichern
         {
             lcd_command(LCD_CURSOROFF | LCD_BLINKINGOFF);
             lcd_command(LCD_CLEAR);
             set_ds1307_datum(datum_pointer);  // Datum auf DS1307 schreiben
             lcd_printlc(1,1,(unsigned char*) "Speichere Daten");
             _delay_ms(500);
-            lcd_command(LCD_CLEAR); // LCD Anzeige löschen
+            lcd_command(LCD_CLEAR); // LCD Anzeige lï¿½schen
             break;
         }
 
-        if(display_update)  // Wenn sich eine Einstellung geändert hat, Display aktualisieren
+        if(display_update)  // Wenn sich eine Einstellung geï¿½ndert hat, Display aktualisieren
         {
-            display_update =0;  //Display bei nächsten durchlauf nicht mehr aktualisieren
+            display_update =0;  //Display bei nï¿½chsten durchlauf nicht mehr aktualisieren
             lcd_print(strcpy_P (anzeigetext,wochentagname[datum_pointer->wochentag])); // Wochentag aus dem Flash in String umwandeln
             lcd_printlr(3,1,(unsigned char*)anzeigetext); // Wochentag anzeigen
             lcd_print(" "); // Leerstelle
@@ -419,73 +419,73 @@ void menue_datum_einstellen( struct uhr *datum_pointer)
             lcd_printlr(3,4,(unsigned char*)anzeigetext1);																// Datum ausgeben
         }
 
-        switch (cursor_position) // Anwahl der welche Datumseinstellung geändert werden soll -> Wochentag, Tag, Monat, Jahr
+        switch (cursor_position) // Anwahl der welche Datumseinstellung geï¿½ndert werden soll -> Wochentag, Tag, Monat, Jahr
         {
 		/*************************************************************************
-		* Wochentag wird geändert
+		* Wochentag wird geï¿½ndert
 		*************************************************************************/
         case 0:	
         {
-            if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrückt
+            if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrï¿½ckt
             {
-                (datum_pointer->wochentag == 7) ? (datum_pointer->wochentag =1) : (datum_pointer->wochentag++);	//Abfrage ob Überlauf und dann Wert setzen
-                display_update = 1;																		// Datum hat sich geändert
+                (datum_pointer->wochentag == 7) ? (datum_pointer->wochentag =1) : (datum_pointer->wochentag++);	//Abfrage ob ï¿½berlauf und dann Wert setzen
+                display_update = 1;																		// Datum hat sich geï¿½ndert
             }
-            else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrückt
+            else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrï¿½ckt
             {
-                (datum_pointer->wochentag == 1) ? (datum_pointer->wochentag =7) : (datum_pointer->wochentag--);	//Abfrage ob Überlauf und dann Wert setzen
-                display_update = 1;																		// Datum hat sich geändert
+                (datum_pointer->wochentag == 1) ? (datum_pointer->wochentag =7) : (datum_pointer->wochentag--);	//Abfrage ob ï¿½berlauf und dann Wert setzen
+                display_update = 1;																		// Datum hat sich geï¿½ndert
             }
             break;
         }
 		/*************************************************************************
-		* Tag wird geändert
+		* Tag wird geï¿½ndert
 		*************************************************************************/
         case 1: 
         {
-            if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrückt
+            if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrï¿½ckt
             {
-                (datum_pointer->tag == 31) ? (datum_pointer->tag =1) : (datum_pointer->tag++);	// Abfrage ob Überlauf und dann Wert setzen
-                display_update =1;																		// Datum hat sich geändert
+                (datum_pointer->tag == 31) ? (datum_pointer->tag =1) : (datum_pointer->tag++);	// Abfrage ob ï¿½berlauf und dann Wert setzen
+                display_update =1;																		// Datum hat sich geï¿½ndert
             }
-            else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrückt
+            else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrï¿½ckt
             {
-                (datum_pointer->tag== 1) ? (datum_pointer->tag =31) : (datum_pointer->tag--);		// Abfrage ob Überlauf und dann Wert setzen
-                display_update = 1;																		// Datum hat sich geändert
+                (datum_pointer->tag== 1) ? (datum_pointer->tag =31) : (datum_pointer->tag--);		// Abfrage ob ï¿½berlauf und dann Wert setzen
+                display_update = 1;																		// Datum hat sich geï¿½ndert
             }
             break;
         }
 		/*************************************************************************
-		* Monat wird geändert
+		* Monat wird geï¿½ndert
 		*************************************************************************/
         case 2: 
         {
-            if ( get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrückt
+            if ( get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrï¿½ckt
             {
-                (datum_pointer->monat == 12) ? (datum_pointer->monat =1) : (datum_pointer->monat++); // Abfrage ob Überlauf und dann Wert setzen
-                display_update =1;																		// Datum hat sich geändert
+                (datum_pointer->monat == 12) ? (datum_pointer->monat =1) : (datum_pointer->monat++); // Abfrage ob ï¿½berlauf und dann Wert setzen
+                display_update =1;																		// Datum hat sich geï¿½ndert
             }
-            if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))								// Taste DOWN gedrückt
+            if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))								// Taste DOWN gedrï¿½ckt
             {
-                (datum_pointer->monat == 1) ? (datum_pointer->monat =12) : (datum_pointer->monat--); // Abfrage ob Überlauf und dann Wert setzen
-                display_update = 1;																		// Datum hat sich geändert
+                (datum_pointer->monat == 1) ? (datum_pointer->monat =12) : (datum_pointer->monat--); // Abfrage ob ï¿½berlauf und dann Wert setzen
+                display_update = 1;																		// Datum hat sich geï¿½ndert
             }
             break;
         }
 		/*************************************************************************
-		* Jahr wird geändert
+		* Jahr wird geï¿½ndert
 		*************************************************************************/
         case 3: 
         {
-            if ( get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrückt
+            if ( get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrï¿½ckt
             {
-                (datum_pointer->jahr == 99) ? (datum_pointer->jahr =0) : (datum_pointer->jahr++); // Abfrage ob Überlauf und dann Wert setzen
-                display_update =1;																		// Datum hat sich geändert
+                (datum_pointer->jahr == 99) ? (datum_pointer->jahr =0) : (datum_pointer->jahr++); // Abfrage ob ï¿½berlauf und dann Wert setzen
+                display_update =1;																		// Datum hat sich geï¿½ndert
             }
-            if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))								// Taste DOWN gedrückt
+            if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))								// Taste DOWN gedrï¿½ckt
             {
-                (datum_pointer->jahr == 0) ? (datum_pointer->jahr =99) : (datum_pointer->jahr--); // Abfrage ob Überlauf und dann Wert setzen
-                display_update = 1;																		// Datum hat sich geändert
+                (datum_pointer->jahr == 0) ? (datum_pointer->jahr =99) : (datum_pointer->jahr--); // Abfrage ob ï¿½berlauf und dann Wert setzen
+                display_update = 1;																		// Datum hat sich geï¿½ndert
             }
             break;
         }
@@ -493,7 +493,7 @@ void menue_datum_einstellen( struct uhr *datum_pointer)
             break;
         }
     }
-    lcd_command(LCD_CLEAR);	// LCD Anzeige löschen
+    lcd_command(LCD_CLEAR);	// LCD Anzeige lï¿½schen
 }
 /*************************************************************************
  * menue_temperatur_offset(..) - Temperatur Offset des LM76 einstellen
@@ -521,9 +521,9 @@ void menue_temperatur_offset( int8_t *offset)
         lcd_printlc(4,1,(unsigned char*) "Offset:     ");						// String ausgeben
         lcd_print((unsigned char*) anzeigetext1);								// Offset String ausgeben
         lcd_print((unsigned char*) "  ");										// String ausgeben
-        if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP)) *offset+=2;    // Wenn Taste UP gedrückt -> Offsetwert erhöhen, 2 -> da Temperatur auf 0.1 Grad gerundet
-        if (get_key_press( 1<<KEY_DOWN) | get_key_rpt(1<< KEY_DOWN)) *offset-=2;// Wenn Taste DOWN gedrückt -> Offsetwert verringern, 2 -> da Temperatur auf 0.1 Grad gerundet
-        if (get_key_press( 1<<KEY_OK) | get_key_rpt(1<< KEY_OK))				// Wenn Taste OK gedrückt -> Offset speichern und Menue verlassen
+        if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP)) *offset+=2;    // Wenn Taste UP gedrï¿½ckt -> Offsetwert erhï¿½hen, 2 -> da Temperatur auf 0.1 Grad gerundet
+        if (get_key_press( 1<<KEY_DOWN) | get_key_rpt(1<< KEY_DOWN)) *offset-=2;// Wenn Taste DOWN gedrï¿½ckt -> Offsetwert verringern, 2 -> da Temperatur auf 0.1 Grad gerundet
+        if (get_key_press( 1<<KEY_OK) | get_key_rpt(1<< KEY_OK))				// Wenn Taste OK gedrï¿½ckt -> Offset speichern und Menue verlassen
         {
             lcd_command(LCD_CLEAR);
             lcd_printlc(1,1,(unsigned char*) "Speichere Daten");
@@ -534,7 +534,7 @@ void menue_temperatur_offset( int8_t *offset)
             lcd_command(LCD_CLEAR);
             break;     // Menue verlassen
         }
-        if (get_key_press( 1<<KEY_ESC) | get_key_rpt(1<< KEY_ESC))				 // Wenn Taste ESC gedrückt -> Alten Offset behalten und Menue verlassen
+        if (get_key_press( 1<<KEY_ESC) | get_key_rpt(1<< KEY_ESC))				 // Wenn Taste ESC gedrï¿½ckt -> Alten Offset behalten und Menue verlassen
         {
             *offset = offset_alt; // Neuen Offset verwerfen
             break;     // Menue verlassen
@@ -542,11 +542,11 @@ void menue_temperatur_offset( int8_t *offset)
     }
 }
 /*************************************************************************
- * menue_schalttemperaturen_einstellen(..) -  Menü um die Schalttemperaturen vom Heizer, Lüfter und Alarmschwelle zu ändern
+ * menue_schalttemperaturen_einstellen(..) -  Menï¿½ um die Schalttemperaturen vom Heizer, Lï¿½fter und Alarmschwelle zu ï¿½ndern
  * PE:unsigned char * text1 // Text der an LCD Position (2,1) angezeigt wird
  * PE:unsigned char * text2 // Text der an LCD Position (3,1) angezeigt wird
  * PE:unsigned char * text3 // Text der an LCD Position (4,1) angezeigt wird
- * PE:schalt_temperaturen * schalt_aktuell // Schalttemperatur die geändert werden soll
+ * PE:schalt_temperaturen * schalt_aktuell // Schalttemperatur die geï¿½ndert werden soll
  * PE:schalt_temperaturen * eeprom // EEPROM Speicherplatz der Schalttemperatur
  * PA:void
  *************************************************************************/
@@ -558,9 +558,9 @@ void menue_schalttemperaturen_einstellen( unsigned char *text1, unsigned char *t
     alt = *schalt_aktuell;
     *buffer = NULL;
 
-    lcd_printlc(2,1,(unsigned char*) text1);  // übergebenen String auf Linie 1 ausgeben
-    lcd_printlc(3,1, (unsigned char*) text2); // übergebenen String auf Linie 1 ausgeben
-    lcd_printlc(4,1, (unsigned char*) text3); // übergebenen String auf Linie 1 ausgeben
+    lcd_printlc(2,1,(unsigned char*) text1);  // ï¿½bergebenen String auf Linie 1 ausgeben
+    lcd_printlc(3,1, (unsigned char*) text2); // ï¿½bergebenen String auf Linie 1 ausgeben
+    lcd_printlc(4,1, (unsigned char*) text3); // ï¿½bergebenen String auf Linie 1 ausgeben
     while(1)
     {
 
@@ -568,7 +568,7 @@ void menue_schalttemperaturen_einstellen( unsigned char *text1, unsigned char *t
         lcd_command(LCD_CURSORON | LCD_BLINKINGON);							// Blinkender Cursor
         if (get_key_short(1<<KEY_RIGHT)) (cursor_position==3) ? (cursor_position = 2) : (cursor_position++);		// Cursor auf entsprechende Einstellung setzen
         else if (get_key_short(1<<KEY_LEFT)) (cursor_position==2) ? (cursor_position = 3) : (cursor_position--);	// Cursor auf entsprechende Einstellung setzen
-        else if(get_key_press(1<<KEY_OK)) // Werte abspeichern und Menü verlassen
+        else if(get_key_press(1<<KEY_OK)) // Werte abspeichern und Menï¿½ verlassen
         {
             lcd_command(LCD_CURSOROFF | LCD_BLINKINGOFF);
             lcd_command(LCD_CLEAR);
@@ -577,16 +577,16 @@ void menue_schalttemperaturen_einstellen( unsigned char *text1, unsigned char *t
             eeprom_write_block (schalt_aktuell, eeprom, sizeof(schalt_werte)); // Schalttemperaturen im EEPROM speichern
 			sei();	// Interrupts global einschalten
             _delay_ms(500);
-            lcd_command(LCD_CLEAR); // LCD Anzeige löschen
+            lcd_command(LCD_CLEAR); // LCD Anzeige lï¿½schen
             break;
         }
-        else if(get_key_press(1<<KEY_ESC)) // Menü verlassen ohne die neuen Werte abzuspeichern
+        else if(get_key_press(1<<KEY_ESC)) // Menï¿½ verlassen ohne die neuen Werte abzuspeichern
         {
             *schalt_aktuell = alt;  // Neue Werte verwerfen
             break; 	// Funktion verlassen
         }
 
-        if(display_update)  // Wenn sich die Werte geändert haben Display neu schreiben
+        if(display_update)  // Wenn sich die Werte geï¿½ndert haben Display neu schreiben
         {
             display_update =0;  
             temperatur_to_string(schalt_aktuell->max, buffer); // in String konvertieren
@@ -599,21 +599,21 @@ void menue_schalttemperaturen_einstellen( unsigned char *text1, unsigned char *t
             lcd_print(" "); //
         }
 		/*************************************************************************
-		* Max oder höhere Temperatur einstellen
+		* Max oder hï¿½here Temperatur einstellen
 		*************************************************************************/
         switch (cursor_position)
         {
         case 2:
         {
-            if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrückt
+            if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrï¿½ckt
             {
-                (schalt_aktuell->max == 600) ? (schalt_aktuell->max =0) : (schalt_aktuell->max += 2);	// Abfrage ob Minutenüberlauf und dann Wert setzen
-                display_update =1;																		// Zeit hat sich geändert
+                (schalt_aktuell->max == 600) ? (schalt_aktuell->max =0) : (schalt_aktuell->max += 2);	// Abfrage ob Minutenï¿½berlauf und dann Wert setzen
+                display_update =1;																		// Zeit hat sich geï¿½ndert
             }
-            else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrückt
+            else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrï¿½ckt
             {
-                (schalt_aktuell->max== 0) ? (schalt_aktuell->max =600) : (schalt_aktuell->max-= 2);		// Abfrage ob Minutenüberlauf und dann Wert setzen
-                display_update = 1;																		// Zeit hat sich geändert
+                (schalt_aktuell->max== 0) ? (schalt_aktuell->max =600) : (schalt_aktuell->max-= 2);		// Abfrage ob Minutenï¿½berlauf und dann Wert setzen
+                display_update = 1;																		// Zeit hat sich geï¿½ndert
             }
 			break;
         }
@@ -622,15 +622,15 @@ void menue_schalttemperaturen_einstellen( unsigned char *text1, unsigned char *t
 		*************************************************************************/
         case 3:
         {
-            if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrückt
+            if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))									// Taste UP gedrï¿½ckt
             {
-                (schalt_aktuell->min == 600) ? (schalt_aktuell->min =0) : (schalt_aktuell->min += 2);		// Abfrage ob Minutenüberlauf und dann Wert setzen
-                display_update =1;																		// Zeit hat sich geändert
+                (schalt_aktuell->min == 600) ? (schalt_aktuell->min =0) : (schalt_aktuell->min += 2);		// Abfrage ob Minutenï¿½berlauf und dann Wert setzen
+                display_update =1;																		// Zeit hat sich geï¿½ndert
             }
-            else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrückt
+            else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))							// Taste DOWN gedrï¿½ckt
             {
-                (schalt_aktuell->min== 0) ? (schalt_aktuell->min =600) : (schalt_aktuell->min -= 2);		// Abfrage ob Minutenüberlauf und dann Wert setzen
-                display_update = 1;																		// Zeit hat sich geändert
+                (schalt_aktuell->min== 0) ? (schalt_aktuell->min =600) : (schalt_aktuell->min -= 2);		// Abfrage ob Minutenï¿½berlauf und dann Wert setzen
+                display_update = 1;																		// Zeit hat sich geï¿½ndert
             }
 			break;
         }
@@ -640,7 +640,7 @@ void menue_schalttemperaturen_einstellen( unsigned char *text1, unsigned char *t
     }
 }
 /*************************************************************************
- * menu_mondlicht_helligkeit_einstellen(..) - Menü um die Helligkeit des Mondlicht LED einzustellen
+ * menu_mondlicht_helligkeit_einstellen(..) - Menï¿½ um die Helligkeit des Mondlicht LED einzustellen
  * Die PWM Duty Cycle kann von 0-100% einstellt werden
  * PE:uint8_t * helligkeit_pointer // Pointer auf Wert der Helligkeit 0 -100
  * PE:uint8_t * eeprom  // // EEPROM Speicherplatz der Helligkeit
@@ -650,7 +650,7 @@ void menu_mondlicht_helligkeit_einstellen( uint8_t * helligkeit_pointer, uint8_t
 {
 	uint8_t display_update =1; // Hilfsvariablen 
 	uint8_t helligkeit_alt; 
-	helligkeit_alt = *helligkeit_pointer; // Falls der Wert nicht geändert werden soll, aktuelle Helligkeit zwischenspeichern
+	helligkeit_alt = *helligkeit_pointer; // Falls der Wert nicht geï¿½ndert werden soll, aktuelle Helligkeit zwischenspeichern
 	
 	lcd_printlc(3,1,(unsigned char*)"Helligkeit:   ");
 	
@@ -659,7 +659,7 @@ void menu_mondlicht_helligkeit_einstellen( uint8_t * helligkeit_pointer, uint8_t
 	mondlicht_dimmer(*helligkeit_pointer);					// Mondlicht LED einschalten mit aktuellem Helligkeitswert
 		
 	
-	if(display_update)										// Wenn sich die Helligkeit geändert hat
+	if(display_update)										// Wenn sich die Helligkeit geï¿½ndert hat
        {
             display_update =0;  //
             sprintf(anzeigetext1, "%03u%%", *helligkeit_pointer);	// Helligkeit in String umwandeln
@@ -667,7 +667,7 @@ void menu_mondlicht_helligkeit_einstellen( uint8_t * helligkeit_pointer, uint8_t
         }
         
 	 
-        if (get_key_press( 1<<KEY_OK) | get_key_rpt(1<< KEY_OK))// Wenn Taste OK gedrückt -> Helligkeit speichern und Menue verlassen
+        if (get_key_press( 1<<KEY_OK) | get_key_rpt(1<< KEY_OK))// Wenn Taste OK gedrï¿½ckt -> Helligkeit speichern und Menue verlassen
         {
 			mondlicht_dimmer(0);							// Mondlicht LED ausschalten
             lcd_command(LCD_CLEAR);
@@ -679,28 +679,28 @@ void menu_mondlicht_helligkeit_einstellen( uint8_t * helligkeit_pointer, uint8_t
             lcd_command(LCD_CLEAR);
             break;											// Menue verlassen
         }
-        if (get_key_press( 1<<KEY_ESC) | get_key_rpt(1<< KEY_ESC))// Wenn Taste ESC gedrückt -> Alte Helligkeit behalten und Menue verlassen
+        if (get_key_press( 1<<KEY_ESC) | get_key_rpt(1<< KEY_ESC))// Wenn Taste ESC gedrï¿½ckt -> Alte Helligkeit behalten und Menue verlassen
         {
             *helligkeit_pointer = helligkeit_alt;			// Neue Helligkeit verwerfen
 			mondlicht_dimmer(0);							// Mondlicht LED ausschalten
             break;											// Menue verlassen
         }
 		
-		if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))// Taste UP gedrückt
+		if (get_key_press( 1<<KEY_UP) | get_key_rpt(1<< KEY_UP))// Taste UP gedrï¿½ckt
         {
             (*helligkeit_pointer == 100) ? (*helligkeit_pointer =0) : (*helligkeit_pointer+=1);	//Abfrage ob Helligkeit 100% und dann Wert setzen
-            display_update = 1;																	// Helligkeit hat sich geändert
+            display_update = 1;																	// Helligkeit hat sich geï¿½ndert
         }
-        else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))						// Taste DOWN gedrückt
+        else if ( get_key_press( 1<<KEY_DOWN ) | get_key_rpt(1<< KEY_DOWN))						// Taste DOWN gedrï¿½ckt
         {
             (*helligkeit_pointer == 0) ? (*helligkeit_pointer =100) : (*helligkeit_pointer-=1);	//Abfrage ob Helligkeit 0% und dann Wert setzen
-            display_update = 1;																	// Helligkeit hat sich geändert
+            display_update = 1;																	// Helligkeit hat sich geï¿½ndert
         }
 	}			
 }
 /*************************************************************************
- * menu_phwert_klaibrieren(..) - Menü um die Sonde für den pH Wert zu kalibrieren
- * Die Sonde wird in die einzelnen Referenz Lösungen getaucht und dann 1 Min gewartet um 
+ * menu_phwert_klaibrieren(..) - Menï¿½ um die Sonde fï¿½r den pH Wert zu kalibrieren
+ * Die Sonde wird in die einzelnen Referenz Lï¿½sungen getaucht und dann 1 Min gewartet um 
  * einen stabilen Wert zu bekommen, dann wird der ADC Wert ausgelesen. 
  * Um Schluss werden die Funktionen zur Kalibrierung des pH Wertes berechnet
  * PA:void
@@ -720,13 +720,13 @@ void menu_phwert_kalibrieren(void)
 			lcd_command(LCD_CLEAR);
 			 break;	
 		}			 
-        if (get_key_press( 1<<KEY_OK) | get_key_rpt(1<< KEY_OK))	// Wenn Taste OK gedrückt -> Kalibrierung starten
+        if (get_key_press( 1<<KEY_OK) | get_key_rpt(1<< KEY_OK))	// Wenn Taste OK gedrï¿½ckt -> Kalibrierung starten
 		{
 			/*************************************************************************
-			* Zwischen dem Messvorgängen wird immer eine Minute gewartet um des Sonde
-			* genügend Zeit zu geben sich dem neuen ph Wert anzupassen
+			* Zwischen dem Messvorgï¿½ngen wird immer eine Minute gewartet um des Sonde
+			* genï¿½gend Zeit zu geben sich dem neuen ph Wert anzupassen
 			*************************************************************************/
-			timer_counter = WARTEZEIT_PH_KALIBRIEREN;	// Timervariable für Wartezeit
+			timer_counter = WARTEZEIT_PH_KALIBRIEREN;	// Timervariable fï¿½r Wartezeit
 			lcd_printlrc(2,1,(unsigned char*) strcpy_P (anzeigetext,PSTR("Sonde in pH4.0      Loesung tauchen      ")));// String ausgeben
 			do											// in Schleife warten bis Zeit abgelaufen
 			{
@@ -736,10 +736,10 @@ void menu_phwert_kalibrieren(void)
 			}while (timer_counter);
 			
 			adc_ph4 = adc_read_channel(PH_ADC_CHANNEL); // ADC Wert bei ph 4.0 auslesen
-			get_key_press( 1<<KEY_OK);					// Falls in der Schleife irgendwann mal OK gedrückt wurde -> Taste löschen
-			while((!get_key_press( 1<<KEY_OK)));		// Warten bis OK gedrückt
+			get_key_press( 1<<KEY_OK);					// Falls in der Schleife irgendwann mal OK gedrï¿½ckt wurde -> Taste lï¿½schen
+			while((!get_key_press( 1<<KEY_OK)));		// Warten bis OK gedrï¿½ckt
 			/************************************************************************/
-			timer_counter = WARTEZEIT_PH_KALIBRIEREN;	// Timervariable für Wartezeit 
+			timer_counter = WARTEZEIT_PH_KALIBRIEREN;	// Timervariable fï¿½r Wartezeit 
 			lcd_printlrc(2,1,(unsigned char*) strcpy_P (anzeigetext,PSTR("Sonde in pH7.0      Loesung tauchen")));// String ausgeben
 			do											// in Schleife warten bis Zeit abgelaufen
 			{
@@ -748,10 +748,10 @@ void menu_phwert_kalibrieren(void)
 				lcd_print((unsigned char*) strcpy_P (anzeigetext,PSTR("s warten -> OK  ")));// String ausgeben
 			}while (timer_counter);
 			adc_ph7 = adc_read_channel(PH_ADC_CHANNEL); // ADC Wert bei ph 7.0 auslesen
-			get_key_press( 1<<KEY_OK);					// Falls in der Schleife irgendwann mal OK gedrückt wurde -> Taste löschen
+			get_key_press( 1<<KEY_OK);					// Falls in der Schleife irgendwann mal OK gedrï¿½ckt wurde -> Taste lï¿½schen
 			while((!get_key_press( 1<<KEY_OK)));
 			/************************************************************************/
-			timer_counter = WARTEZEIT_PH_KALIBRIEREN;	// Timervariable für Wartezeit 
+			timer_counter = WARTEZEIT_PH_KALIBRIEREN;	// Timervariable fï¿½r Wartezeit 
 			lcd_printlrc(2,1,(unsigned char*) strcpy_P (anzeigetext,PSTR("Sonde in pH9.0      Loesung tauchen")));// String ausgeben
 			do											// in Schleife warten bis Zeit abgelaufen
 			{
@@ -763,7 +763,7 @@ void menu_phwert_kalibrieren(void)
 			/************************************************************************/
 			// Eigentliche Kalibrierung -> Funktionswerte Steigung und Nullversatz berechnen
 			phwert_kalibrieren(&adc_ph4, &adc_ph7, &adc_ph9, &phwert_referenzen); 
-			get_key_press( 1<<KEY_OK);					// Falls in der Schleife irgendwann mal OK gedrückt wurde -> Taste löschen
+			get_key_press( 1<<KEY_OK);					// Falls in der Schleife irgendwann mal OK gedrï¿½ckt wurde -> Taste lï¿½schen
 			
 			lcd_printlrc(2,1,(unsigned char*) strcpy_P (anzeigetext,PSTR("Kalibrierung        abgeschlossen")));// String ausgeben
 			lcd_printlr(4,1,(unsigned char*) strcpy_P (anzeigetext,PSTR("ESC druecken     ")));// String ausgeben	
@@ -771,13 +771,13 @@ void menu_phwert_kalibrieren(void)
 	}			
 }
 /*************************************************************************
-* Da den Funktionspointern im Menü keine Parameter mitgegeben werden können,
-* werden über das Menü die "funkt_" Funktionen aufgerufen und so die eigentlichen 
-* Menüfunktionen mit Parameterübergabe aufgerufen.
+* Da den Funktionspointern im Menï¿½ keine Parameter mitgegeben werden kï¿½nnen,
+* werden ï¿½ber das Menï¿½ die "funkt_" Funktionen aufgerufen und so die eigentlichen 
+* Menï¿½funktionen mit Parameterï¿½bergabe aufgerufen.
 *************************************************************************/
 
 /*************************************************************************
- * funkt_menu_temperatur_offet(..) - Funktionsmenü zur Einstellung des
+ * funkt_menu_temperatur_offet(..) - Funktionsmenï¿½ zur Einstellung des
  * Temperatur Offset des LM 76
  * PE:void
  * PA:void
@@ -785,12 +785,12 @@ void menu_phwert_kalibrieren(void)
 void funkt_menu_temperatur_offet(void)
 {
     lcd_command(LCD_CLEAR);
-	// Eigentliches Menü für die Einstellung des Offsets mit entsprechendem Übergabewert aufrufen
+	// Eigentliches Menï¿½ fï¿½r die Einstellung des Offsets mit entsprechendem ï¿½bergabewert aufrufen
     menue_temperatur_offset(&temperatur_offset);
     lcd_command(LCD_CLEAR);
 }
 /*************************************************************************
- * funkt_menu_heizer(..) - Funktionsmenü zur Einstellung der Schalttemperaturen
+ * funkt_menu_heizer(..) - Funktionsmenï¿½ zur Einstellung der Schalttemperaturen
  * des Heizstabes
  * PE:void
  * PA:void
@@ -798,27 +798,27 @@ void funkt_menu_temperatur_offet(void)
 void funkt_menu_heizer(void)
 {
     lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Heizer Einstellungen"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Schalttemperaturen mit entsprechenden Texten und Übergabewerten aufrufen
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Heizer Einstellungen"))); // Menï¿½string anzeigen
+	// Eigentliches Menï¿½ fï¿½r die Einstellung der Schalttemperaturen mit entsprechenden Texten und ï¿½bergabewerten aufrufen
     menue_schalttemperaturen_einstellen(strcpy_P (anzeigetext,PSTR("Heizer ein:")), strcpy_P (anzeigetext1,PSTR("Heizer aus:")), strcpy_P (anzeigetext2,PSTR("Hysterese:")),&heizer, &heizer_eeprom);
     lcd_command(LCD_CLEAR);
 }
 /*************************************************************************
- * funkt_menu_luefter(..) - Funktionsmenü zur Einstellung der Schalttemperaturen
- * des Lüfters
+ * funkt_menu_luefter(..) - Funktionsmenï¿½ zur Einstellung der Schalttemperaturen
+ * des Lï¿½fters
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_luefter(void)
 {
     lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Luefter einstellung"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Schalttemperaturen mit entsprechenden Texten und Übergabewerten aufrufen
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Luefter einstellung"))); // Menï¿½string anzeigen
+	// Eigentliches Menï¿½ fï¿½r die Einstellung der Schalttemperaturen mit entsprechenden Texten und ï¿½bergabewerten aufrufen
     menue_schalttemperaturen_einstellen(strcpy_P (anzeigetext,PSTR("Luefter ein:")), (unsigned char*)strcpy_P (anzeigetext1,PSTR("Luefter aus:")), (unsigned char*)strcpy_P (anzeigetext2,PSTR("Hysterese:")),&luefter, &luefter_eeprom);
     lcd_command(LCD_CLEAR);
 }
 /*************************************************************************
- * funkt_menu_alarm(..) - Funktionsmenü zur Einstellung der maximalen und
+ * funkt_menu_alarm(..) - Funktionsmenï¿½ zur Einstellung der maximalen und
  * minimalen Temperatur im Aquarium
  * PE:void
  * PA:void
@@ -826,13 +826,13 @@ void funkt_menu_luefter(void)
 void funkt_menu_alarm(void)
 {
     lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Temperatur Min/Max:"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Temperaturen mit entsprechenden Texten und Übergabewerten aufrufen
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Temperatur Min/Max:"))); // Menï¿½string anzeigen
+	// Eigentliches Menï¿½ fï¿½r die Einstellung der Temperaturen mit entsprechenden Texten und ï¿½bergabewerten aufrufen
     menue_schalttemperaturen_einstellen(strcpy_P (anzeigetext,PSTR("Temp. Max:")), (unsigned char*)strcpy_P (anzeigetext1,PSTR("Temp. Min:")), (unsigned char*)strcpy_P (anzeigetext2,PSTR("Hysterese:")),&alarm, &alarm_eeprom);
     lcd_command(LCD_CLEAR);
 }
 /*************************************************************************
- * funkt_menu_datum(..) - Funktionsmenü zur Einstellung des aktuellen
+ * funkt_menu_datum(..) - Funktionsmenï¿½ zur Einstellung des aktuellen
  * Datums des DS 1307
  * PE:void
  * PA:void
@@ -844,7 +844,7 @@ void funkt_menu_datum(void)
     menue_datum_einstellen(&zeit);
 }
 /*************************************************************************
- * funkt_menu_uhr(..) - Funktionsmenü zur Einstellung der aktuellen 
+ * funkt_menu_uhr(..) - Funktionsmenï¿½ zur Einstellung der aktuellen 
  * Uhrzeit des DS 1307
  * PE:void
  * PA:void
@@ -852,14 +852,14 @@ void funkt_menu_datum(void)
 void funkt_menu_uhr(void)
 {
     lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Aktuelle Uhrzeit    eingeben"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung des Datums mit entsprechenden Übergabewerten aufrufen	
-	// hier wird nichts ins EEPROM geschrieben darum EEPROM Adresse auf 0 -> wird im Menü entsprechend abgefragt
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Aktuelle Uhrzeit    eingeben"))); // Menï¿½string anzeigen
+	// Eigentliches Menï¿½ fï¿½r die Einstellung des Datums mit entsprechenden ï¿½bergabewerten aufrufen	
+	// hier wird nichts ins EEPROM geschrieben darum EEPROM Adresse auf 0 -> wird im Menï¿½ entsprechend abgefragt
     menue_zeiten_einstellen(&zeit,NULL );
 }
 /*************************************************************************
- * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
- * Einschaltzeit für die Lampe
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Einschaltzeit fï¿½r die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
@@ -870,21 +870,21 @@ void funkt_menu_lampe_ein_am(void)
     menue_zeiten_einstellen(&lampe_on1, &lampe_on_eeprom1 );
 }
 /*************************************************************************
- * funkt_menu_lampe_aus_am(..) - Funktionsmenü zur Einstellung der 
- * Ausschaltzeit für die Lampe
+ * funkt_menu_lampe_aus_am(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Ausschaltzeit fï¿½r die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_lampe_aus_am(void)
 {   
     lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit AM Einstell.   Lampe ausschalten:"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Einschaltzeit der Lampe  mit entsprechenden Übergabewerten aufrufen
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit AM Einstell.   Lampe ausschalten:"))); // Menï¿½string anzeigen
+	// Eigentliches Menï¿½ fï¿½r die Einstellung der Einschaltzeit der Lampe  mit entsprechenden ï¿½bergabewerten aufrufen
     menue_zeiten_einstellen(&lampe_off1, &lampe_off_eeprom1 );
 }
 /*************************************************************************
- * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
- * Einschaltzeit für die Lampe
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Einschaltzeit fï¿½r die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
@@ -895,23 +895,23 @@ void funkt_menu_lampe_ein_pm(void)
     menue_zeiten_einstellen(&lampe_on2, &lampe_on_eeprom2 );
 }
 /*************************************************************************
- * funkt_menu_lampe_aus_am(..) - Funktionsmenü zur Einstellung der 
- * Ausschaltzeit für die Lampe
+ * funkt_menu_lampe_aus_am(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Ausschaltzeit fï¿½r die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_lampe_aus_pm(void)
 {   
     lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit PM Einstell.   Lampe ausschalten:"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Einschaltzeit der Lampe  mit entsprechenden Übergabewerten aufrufen
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit PM Einstell.   Lampe ausschalten:"))); // Menï¿½string anzeigen
+	// Eigentliches Menï¿½ fï¿½r die Einstellung der Einschaltzeit der Lampe  mit entsprechenden ï¿½bergabewerten aufrufen
     menue_zeiten_einstellen(&lampe_off2, &lampe_off_eeprom2 );
 }
 
 
 /*************************************************************************
- * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
- * Einschaltzeit für die Lampe
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Einschaltzeit fï¿½r die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
@@ -922,8 +922,8 @@ void funkt_menu_out_on1(void)
     menue_zeiten_einstellen(&out_on1, &out_on_eeprom1 );
 }
 /*************************************************************************
- * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
- * Einschaltzeit für die Lampe
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Einschaltzeit fï¿½r die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
@@ -934,8 +934,8 @@ void funkt_menu_out_off1(void)
     menue_zeiten_einstellen(&out_off1, &out_off_eeprom1 );
 }
 /*************************************************************************
- * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
- * Einschaltzeit für die Lampe
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Einschaltzeit fï¿½r die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
@@ -946,8 +946,8 @@ void funkt_menu_out_on2(void)
     menue_zeiten_einstellen(&out_on2, &out_on_eeprom2 );
 }
 /*************************************************************************
- * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
- * Einschaltzeit für die Lampe
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Einschaltzeit fï¿½r die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
@@ -965,21 +965,21 @@ void funkt_menu_out_off2(void)
 
 
 /*************************************************************************
- * funkt_menu_futterstop(..) - Funktionsmenü zur Einstellung der 
- * Zeit wie lange die Pumpe beim Fütterungsstopp ausgeschaltet werden soll
+ * funkt_menu_futterstop(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Zeit wie lange die Pumpe beim Fï¿½tterungsstopp ausgeschaltet werden soll
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_futterstop(void)
 {
 	lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Futter Stopp Dauer  eingeben:"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Fütterungsstoppzeit mit entsprechenden Übergabewerten aufrufen
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Futter Stopp Dauer  eingeben:"))); // Menï¿½string anzeigen
+	// Eigentliches Menï¿½ fï¿½r die Einstellung der Fï¿½tterungsstoppzeit mit entsprechenden ï¿½bergabewerten aufrufen
     menue_zeiten_einstellen(&futterstopp, &futterstopp_eeprom );
 	
 }
 /*************************************************************************
- * funkt_menu_mondlicht_ein(..) - Funktionsmenü zur Einstellung der 
+ * funkt_menu_mondlicht_ein(..) - Funktionsmenï¿½ zur Einstellung der 
  * Einschaltzeit des Mondlichts
  * PE:void
  * PA:void
@@ -987,12 +987,12 @@ void funkt_menu_futterstop(void)
 void funkt_menu_mondlicht_ein(void)
 {
     lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit Einstellungen  Mondlicht einstellen:"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Einschaltzeit mit entsprechenden Übergabewerten aufrufen
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit Einstellungen  Mondlicht einstellen:"))); // Menï¿½string anzeigen
+	// Eigentliches Menï¿½ fï¿½r die Einstellung der Einschaltzeit mit entsprechenden ï¿½bergabewerten aufrufen
     menue_zeiten_einstellen(&ml_on, &ml_on_eeprom );
 }
 /*************************************************************************
- * funkt_menu_mondlicht_aus(..) - Funktionsmenü zur Einstellung
+ * funkt_menu_mondlicht_aus(..) - Funktionsmenï¿½ zur Einstellung
  * der Ausschaltzeit des Mondlichts
  * PE:void
  * PA:void
@@ -1000,13 +1000,13 @@ void funkt_menu_mondlicht_ein(void)
 void funkt_menu_mondlicht_aus(void)
 {
     lcd_command(LCD_CLEAR);
-    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit Einstellungen  Mondlicht ausschalten:"))); // Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Ausschaltzeit mit entsprechenden Übergabewerten aufrufen
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit Einstellungen  Mondlicht ausschalten:"))); // Menï¿½string anzeigen
+	// Eigentliches Menï¿½ fï¿½r die Einstellung der Ausschaltzeit mit entsprechenden ï¿½bergabewerten aufrufen
     menue_zeiten_einstellen(&ml_off, &ml_off_eeprom );
     lcd_command(LCD_CLEAR);
 }
 /*************************************************************************
- * funkt_menu_mondlicht_helligkeit(..) - Funktionsmenü für die Dimmung 
+ * funkt_menu_mondlicht_helligkeit(..) - Funktionsmenï¿½ fï¿½r die Dimmung 
  * des Mondlichts
  * PE:void
  * PA:void
@@ -1014,27 +1014,27 @@ void funkt_menu_mondlicht_aus(void)
 void funkt_menu_mondlicht_helligkeit(void)
 {
 	lcd_command(LCD_CLEAR);
-	lcd_printlc(1,1,(unsigned char*) strcpy_P (anzeigetext,PSTR("Mondlicht Helligkeit")));	// Menüstring anzeigen
-	lcd_printlc(2,1,(unsigned char*) strcpy_P (anzeigetext,PSTR("anpassen: ")));			// Menüstring anzeigen
-	// Eigentliches Menü für die Einstellung der Dimmung mit entsprechenden Übergabewerten aufrufen
+	lcd_printlc(1,1,(unsigned char*) strcpy_P (anzeigetext,PSTR("Mondlicht Helligkeit")));	// Menï¿½string anzeigen
+	lcd_printlc(2,1,(unsigned char*) strcpy_P (anzeigetext,PSTR("anpassen: ")));			// Menï¿½string anzeigen
+	// Eigentliches Menï¿½ fï¿½r die Einstellung der Dimmung mit entsprechenden ï¿½bergabewerten aufrufen
 	menu_mondlicht_helligkeit_einstellen(&mondlicht_helligkeit, &mondlicht_helligkeit_eeprom);
 	lcd_command(LCD_CLEAR);
 }	
 /*************************************************************************
- * funkt_menu_phwert_kalibrieren(..) - Funktionsmenü für die Kalibrierung der
+ * funkt_menu_phwert_kalibrieren(..) - Funktionsmenï¿½ fï¿½r die Kalibrierung der
  * pH Sonde
  * PE:void
  * PA:void
  *************************************************************************/
 void funkt_menu_phwert_kalibrieren(void)
 {
-	menu_phwert_kalibrieren(); // Eigentliches Menü für die Kalibrierung der pH Sonde aufrufen
+	menu_phwert_kalibrieren(); // Eigentliches Menï¿½ fï¿½r die Kalibrierung der pH Sonde aufrufen
 	cli(); // Interrupts global aus da EEPROM Zugriffe zeitkritisch
 	eeprom_write_block (&phwert_referenzen, &phwert_referenzen_eeprom, sizeof(Ph_reverenz)); // pH Wert Referenzen im EEPROM speichern
 	sei(); // Interrupt global wieder freigeben
 }
 /*************************************************************************
- * funkt_menu_about(..) - Abouttext für Hard und Softwareversionen anzeigen
+ * funkt_menu_about(..) - Abouttext fï¿½r Hard und Softwareversionen anzeigen
  * PE:void
  * PA:void
  *************************************************************************/
@@ -1052,12 +1052,12 @@ void funkt_menu_about(void)
 		//{
 			//lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("     ********   ")));
 		//}
-		if(get_key_press(ALL_KEYS)) break; // Irgendeine Taste gesrückt-> Menü verlassen
+		if(get_key_press(ALL_KEYS)) break; // Irgendeine Taste gesrï¿½ckt-> Menï¿½ verlassen
 	}
 	lcd_command(LCD_CLEAR);
 }
 /*************************************************************************
- * funkt_menu_max_werte(..) - Menüanzeige der Tages Maximalwerte von Temperatur und pH Wert
+ * funkt_menu_max_werte(..) - Menï¿½anzeige der Tages Maximalwerte von Temperatur und pH Wert
  * PE:void
  * PA:void
  *************************************************************************/
@@ -1096,15 +1096,15 @@ void funkt_menu_max_werte(void)
 	lcd_command(LCD_CLEAR);
 }
 /*************************************************************************
- * vergleiche_temperaturen(..) -  Temperatur mit mit min/max Werten vergleichen und Ergebnis zurückgeben
+ * vergleiche_temperaturen(..) -  Temperatur mit mit min/max Werten vergleichen und Ergebnis zurï¿½ckgeben
  * PE:uint32_t * minimum // Minimum Temperatur mit der verglichen wird
  * PE:uint32_t * maximum // Maximum Temperatur mit der verglichen wird
  * PE:uint32_t * aktuelle_temperatur // Aktuelle Temperatur des Wassers mit der verglichen wird
- * PA:uint8_t // Ergebnis zurückgeben 1 -> höher als max 2 -> kleiner als min, 0 -> Ergebnis zwischen den Temperaturen
+ * PA:uint8_t // Ergebnis zurï¿½ckgeben 1 -> hï¿½her als max 2 -> kleiner als min, 0 -> Ergebnis zwischen den Temperaturen
  *************************************************************************/
 uint8_t vergleiche_temperaturen(int16_t *minimum, int16_t *maximum, int16_t *aktuelle_temperatur)
 {
-    if (*aktuelle_temperatur > *maximum) // Temperatur höher als maximum
+    if (*aktuelle_temperatur > *maximum) // Temperatur hï¿½her als maximum
     {
         return 1;
     }
@@ -1115,7 +1115,7 @@ uint8_t vergleiche_temperaturen(int16_t *minimum, int16_t *maximum, int16_t *akt
     else return 0;  // Keines von beiden
 }
 /*************************************************************************
- * vergleiche_zeiten(..) - Vergleiche die Schaltzeiten der Ausgänge mit der aktuellen Zeit und gibt das Ergebnis zurück
+ * vergleiche_zeiten(..) - Vergleiche die Schaltzeiten der Ausgï¿½nge mit der aktuellen Zeit und gibt das Ergebnis zurï¿½ck
  * PE:struct uhr * ein_zeit // Pointer auf struct der Einschaltzeit
  * PE:struct uhr * aus_zeit // Pointer auf struct der Ausschaltzeit
  * PE:struct uhr * aktuelle_zeit // Pointer auf struct der aktuellen Zeit
@@ -1123,37 +1123,37 @@ uint8_t vergleiche_temperaturen(int16_t *minimum, int16_t *maximum, int16_t *akt
  *************************************************************************/
 uint8_t vergleiche_zeiten(struct uhr *ein_zeit, struct uhr *aus_zeit, struct uhr *aktuelle_zeit)
 {
-    uint32_t ein, aus, aktuell; // Hilfsvariablen für Sekunden seit Mitternacht
+    uint32_t ein, aus, aktuell; // Hilfsvariablen fï¿½r Sekunden seit Mitternacht
     // 
 	/*************************************************************************
-	* Um die Zeiten direkt miteinander vergleichen zu können, 
+	* Um die Zeiten direkt miteinander vergleichen zu kï¿½nnen, 
 	* werden die Sekunden seit Mitternacht berechnet
 	*************************************************************************/
     ein = ((uint32_t)ein_zeit->stunde * 3600)+((uint32_t)ein_zeit->minute * 60)+((uint32_t)ein_zeit->sekunde); // Einschaltzeit Sekunden seit Mitternacht
     aus = ((uint32_t)aus_zeit->stunde * 3600)+((uint32_t)aus_zeit->minute * 60)+((uint32_t)aus_zeit->sekunde); // Ausschaltzeit Sekunden seit Mitternacht
     aktuell = ((uint32_t)aktuelle_zeit->stunde * 3600)+((uint32_t)aktuelle_zeit->minute * 60)+((uint32_t)aktuelle_zeit->sekunde); // Aktuelle Zeit Sekunden seit Mitternacht
 
-    if ( aus < ein) // Wenn der Ausgang über Mitternacht eingeschaltet werden soll -> Auszeit kleiner als Einzeit
+    if ( aus < ein) // Wenn der Ausgang ï¿½ber Mitternacht eingeschaltet werden soll -> Auszeit kleiner als Einzeit
     {
-		// So muss die Aktuelle Zeit grösser als ein Einzeit sein ODER kleiner als die Ausschaltzeit, dann ist der Verbraucher eingeschaltet
+		// So muss die Aktuelle Zeit grï¿½sser als ein Einzeit sein ODER kleiner als die Ausschaltzeit, dann ist der Verbraucher eingeschaltet
         return ((aktuell > ein) || (aktuell < aus)); 
     }
-    else // Wenn der Ausgang innerhalb eines Tages eingeschaltet werden soll -> Auszeit grösser als Einzeit
+    else // Wenn der Ausgang innerhalb eines Tages eingeschaltet werden soll -> Auszeit grï¿½sser als Einzeit
     {
-		// So muss die Aktuelle Zeit grösser als die Einzeit sein UND kleiner als die Auszeit, dann ist der Verbraucher eingeschaltet
+		// So muss die Aktuelle Zeit grï¿½sser als die Einzeit sein UND kleiner als die Auszeit, dann ist der Verbraucher eingeschaltet
         return ((aktuell > ein) && (aktuell < aus)); 
     }
 }
 /*************************************************************************
- * lampen_schalten(..) - Zustandsbit für die zeitgesteuerten 
- * Ausgänge setzen
+ * lampen_schalten(..) - Zustandsbit fï¿½r die zeitgesteuerten 
+ * Ausgï¿½nge setzen
  * PE:void
  * PA:void
 *************************************************************************/
 void lampen_schalten(void)
 {	
 	/*************************************************************************
-	* Zustandsbit für die Lampe setzen
+	* Zustandsbit fï¿½r die Lampe setzen
 	*************************************************************************/
 	// Ein/Ausschaltzeiten mit aktuelle Uhrzeit vergleichen
     if (vergleiche_zeiten(&lampe_on1,&lampe_off1,&zeit) || vergleiche_zeiten(&lampe_on2,&lampe_off2,&zeit)) 
@@ -1164,9 +1164,19 @@ void lampen_schalten(void)
     {
         zustandsbit.lampe =0; // Lampe aus
     }
+    
+    // Out
+       if (vergleiche_zeiten(&out_on1,&out_off1,&zeit) || vergleiche_zeiten(&out_on2,&out_off2,&zeit) ) 
+    {
+        zustandsbit.pumpe =1; // Out ein
+    }
+    else
+    {
+        zustandsbit.pumpe =0; // Out aus
+    }
 	
 	/*************************************************************************
-	* Zustandsbit für die Mondlicht setzen
+	* Zustandsbit fï¿½r die Mondlicht setzen
 	*************************************************************************/
 	// Ein/Ausschaltzeiten mit aktuelle Uhrzeit vergleichen
     if (vergleiche_zeiten(&ml_on,&ml_off,&zeit))
@@ -1179,45 +1189,45 @@ void lampen_schalten(void)
     }
 }
 /*************************************************************************
- * temperatuen_schalten(..) - Zustandbits für die temperaturgesteuerten
- * Ausgänge und Alarmzustand setzen
+ * temperatuen_schalten(..) - Zustandbits fï¿½r die temperaturgesteuerten
+ * Ausgï¿½nge und Alarmzustand setzen
  * PE:void
  * PA:void
  *************************************************************************/
 void temperatuen_schalten(void)
 {
-    uint8_t compare_return; // Hilfsvariable für switch case
+    uint8_t compare_return; // Hilfsvariable fï¿½r switch case
 
     /*************************************************************************
-    *  Zustandsbit für Lüfter schalten
+    *  Zustandsbit fï¿½r Lï¿½fter schalten
     *************************************************************************/
 	// Wassertemperatur mit min/max Werten vergleichen
     compare_return = vergleiche_temperaturen(&luefter.min,&luefter.max,&temperatur); 
     switch (compare_return)
     {
     case 1:
-        zustandsbit.luefter =1; // 1 -> Wasser zu warm Lüfter einschalten
+        zustandsbit.luefter =1; // 1 -> Wasser zu warm Lï¿½fter einschalten
         break;  
     case 2:
-        zustandsbit.luefter =0; // 2 -> Wasser zu kalt Lüfter ausschalten
+        zustandsbit.luefter =0; // 2 -> Wasser zu kalt Lï¿½fter ausschalten
         break;  
     case 0:
-        break;	// 0 ->  Wasser noch unterhalb Lüfter Einschalttemperatur -> nichts machen
+        break;	// 0 ->  Wasser noch unterhalb Lï¿½fter Einschalttemperatur -> nichts machen
     default:
         break;
     }
    /*************************************************************************
-   * Zustand für Alarm Vektor schalten
+   * Zustand fï¿½r Alarm Vektor schalten
    *************************************************************************/
    // Wassertemperatur mit min/max Werten vergleichen, Ergebnis !=0 -> Alarm Vektor entsprechend setzen
     compare_return = (vergleiche_temperaturen(&alarm.min,&alarm.max,&temperatur)); 
     switch (compare_return)
     {
     case 1: 
-        alarm_vektor = 2; // 1 -> Wasser zu warm, Alarm für Temperatur zu hoch
+        alarm_vektor = 2; // 1 -> Wasser zu warm, Alarm fï¿½r Temperatur zu hoch
         break;  
     case 2:
-        alarm_vektor = 3; // 2 -> Wasser zu kalt, Alarm für Temperatur zu niedrig
+        alarm_vektor = 3; // 2 -> Wasser zu kalt, Alarm fï¿½r Temperatur zu niedrig
         break;   
     case 0:
         break; // 0 ->  Normale Wassertemperatur -> nichts machen
@@ -1225,7 +1235,7 @@ void temperatuen_schalten(void)
         break;
     }
     /*************************************************************************
-    * Zustandbit für Heizer schalten
+    * Zustandbit fï¿½r Heizer schalten
     *************************************************************************/
 	// Wassertemperatur mit min/max Werten vergleichen
     compare_return = vergleiche_temperaturen(&heizer.max,&heizer.min,&temperatur); 
@@ -1244,8 +1254,8 @@ void temperatuen_schalten(void)
     }
 }
 /*************************************************************************
- * ausgaenge_ansteuern(..) - Errechnete Schaltzustände sammeln und 
- * die Hardwareausgänge entsprechen dem Modus der Anlage schalten
+ * ausgaenge_ansteuern(..) - Errechnete Schaltzustï¿½nde sammeln und 
+ * die Hardwareausgï¿½nge entsprechen dem Modus der Anlage schalten
  * PE:void
  * PA:void
  *************************************************************************/
@@ -1256,13 +1266,15 @@ void ausgaenge_ansteuern(void)
 	*************************************************************************/
 	if(zustandsbit.run)  
 	{
-		RUNLED_ON;								// LED für Zustand RUN einschalten
+		RUNLED_ON;								// LED fï¿½r Zustand RUN einschalten
 		if(zustandsbit.heizer) HEIZER_ON;	// Heizer ein oder ausschalten
 		else HEIZER_OFF;
-		if(zustandsbit.luefter) LUEFTER_ON;	// Lüfter ein oder ausschalten
+		if(zustandsbit.luefter) LUEFTER_ON;	// Lï¿½fter ein oder ausschalten
 		else LUEFTER_OFF;
 		if(zustandsbit.lampe) LAMPE_ON;		// Lampe ein oder ausschalten
 		else LAMPE_OFF;
+        if(zustandsbit.pumpe) OUT_ON;		// Out ein oder ausschalten
+		else OUT_OFF;
 		// Mondlicht entsprechend den Dimmwert einschalten
 		if(zustandsbit.mondlicht) mondlicht_dimmer(mondlicht_helligkeit);
 		else mondlicht_dimmer(0); // Mondlicht ausschalten
@@ -1285,16 +1297,16 @@ void ausgaenge_ansteuern(void)
 			BUZZER_OFF;
 		}
 		/*************************************************************************
-		*  Sensorwerte für die Tages Max und Min Werte abfragen und entsprechend schreiben
+		*  Sensorwerte fï¿½r die Tages Max und Min Werte abfragen und entsprechend schreiben
 		*************************************************************************/
-		// Abfrage ober bisherige Max und Min  Temperaturen über/unterschritten 
+		// Abfrage ober bisherige Max und Min  Temperaturen ï¿½ber/unterschritten 
 		switch (vergleiche_temperaturen(&extrem_temperatur.min_wert,&extrem_temperatur.max_wert,&temperatur))
 		{
-		case 1:	// 1-> Wasser wärmer als bisherige Max Wert
+		case 1:	// 1-> Wasser wï¿½rmer als bisherige Max Wert
 			extrem_temperatur.max_wert = temperatur;	// Neuer Max Wert
 			extrem_temperatur.max_zeitpunkt = zeit;		// Zeitpunkt mit speichern
 			break; 
-		case 2: // 2-> Wasser kälter als bisheriger Min Wert
+		case 2: // 2-> Wasser kï¿½lter als bisheriger Min Wert
 			extrem_temperatur.min_wert = temperatur;	// Neuer Min Wert
 			extrem_temperatur.min_zeitpunkt = zeit;		// Zeitpunkt mit speichern
 			break;  
@@ -1303,10 +1315,10 @@ void ausgaenge_ansteuern(void)
 		default:
 			break;
 		}
-		// Abfrage ober bisherige Max und Min  ph Werte über/unterschritten 
+		// Abfrage ober bisherige Max und Min  ph Werte ï¿½ber/unterschritten 
 		switch (vergleiche_temperaturen(&extrem_ph.min_wert,&extrem_ph.max_wert,&ph_wert))
 		{
-		case 1: // ph höher als bisheriger Max Wert
+		case 1: // ph hï¿½her als bisheriger Max Wert
 			extrem_ph.max_wert = ph_wert;	// Neuer Max Wert
 			extrem_ph.max_zeitpunkt = zeit;	// Zeitpunkt mit speichern
 			break;  
@@ -1319,7 +1331,7 @@ void ausgaenge_ansteuern(void)
 		default:
 			break;
 		}
-	}
+  	}
 	/*************************************************************************
 	* Wenn Steuerung im Wartungs Mode, alle Verbraucher ausschalten, 
 	* bis auf Licht und Pumpe
@@ -1336,15 +1348,12 @@ void ausgaenge_ansteuern(void)
 		mondlicht_dimmer(0);
 		
 	}
-	/*************************************************************************
-	* Pumpe kann in jedem Zustand ab und angeschaltet werden
-	*************************************************************************/
-	if (zustandsbit.pumpe) OUT_ON; // Entsprechend  den Zustand Pumpe an und ausschalten
-		else OUT_OFF;
+    
+  
 }
 /*************************************************************************
- * futterstop_aktivieren(..) -  Für Pumpenstopp bei der Fütterung wird ein Counter geladen 
- * welcher über den Timer alle 1 sec dekrementiert wird bis Zeit abgelaufen ist
+ * futterstop_aktivieren(..) -  Fï¿½r Pumpenstopp bei der Fï¿½tterung wird ein Counter geladen 
+ * welcher ï¿½ber den Timer alle 1 sec dekrementiert wird bis Zeit abgelaufen ist
  * PE:struct uhr * stopp_zeit // Pointer auf Zeit wie lange die Pumpe ausgeschaltet werden soll
  * PA:void
  *************************************************************************/
@@ -1371,14 +1380,20 @@ void read_eeprom_daten(void)
 	eeprom_read_block (&lampe_off2, &lampe_off_eeprom2, sizeof(struct uhr));		// Ausschaltzeit der Lampe holen
     eeprom_read_block (&ml_on, &ml_on_eeprom, sizeof(struct uhr));				// Einschaltzeit des ML holen
     eeprom_read_block (&ml_off, &ml_off_eeprom, sizeof(struct uhr));			// Ausschaltzeit des MK holen
-    eeprom_read_block (&alarm, &alarm_eeprom, sizeof(schalt_werte));			// Schalttemperatur für den Alarm holen
-    eeprom_read_block (&heizer, &heizer_eeprom, sizeof(schalt_werte));			// Schalttemperatur für den Heizer holen
-    eeprom_read_block (&luefter, &luefter_eeprom, sizeof(schalt_werte));		// Schalttemperatur für den Lüfter holen
-	eeprom_read_block (&futterstopp, &futterstopp_eeprom, sizeof(schalt_werte)); // Schalttemperatur für den Lüfter holen
-	sei();																		// Interrupts global wieder freigeben
+    eeprom_read_block (&alarm, &alarm_eeprom, sizeof(schalt_werte));			// Schalttemperatur fï¿½r den Alarm holen
+    eeprom_read_block (&heizer, &heizer_eeprom, sizeof(schalt_werte));			// Schalttemperatur fï¿½r den Heizer holen
+    eeprom_read_block (&luefter, &luefter_eeprom, sizeof(schalt_werte));		// Schalttemperatur fï¿½r den Lï¿½fter holen
+	eeprom_read_block (&futterstopp, &futterstopp_eeprom, sizeof(schalt_werte)); // Schalttemperatur fï¿½r den Lï¿½fter holen
+	eeprom_read_block (&out_on1, &out_on_eeprom1, sizeof(struct uhr));		// Einschaltzeit  der Lampe holen
+    eeprom_read_block (&out_off1, &out_off_eeprom1, sizeof(struct uhr));		// Ausschaltzeit der Lampe holen
+	eeprom_read_block (&out_on2, &out_on_eeprom2, sizeof(struct uhr));		// Einschaltzeit  der Lampe holen
+	eeprom_read_block (&out_off2, &out_off_eeprom2, sizeof(struct uhr));		// Ausschaltzeit der Lampe holen
+    sei();																		// Interrupts global wieder freigeben
+    
+    
 }
 /*************************************************************************
- * zustand_lcd(..) - Zeichen generieren um die Schaltzustände der Ausgänge auf den Display anzuzeigen
+ * zustand_lcd(..) - Zeichen generieren um die Schaltzustï¿½nde der Ausgï¿½nge auf den Display anzuzeigen
  * PE:uint8_t zustand // 1 = Ein , 0 = Aus
  * PA:uint8_t			// Hex Zeichen retournieren Ein=^  Aus=_
  *************************************************************************/
@@ -1395,23 +1410,23 @@ uint8_t zustand_lcd(uint8_t zustand)
 
 }
 /*************************************************************************
- * send_to_uart(..) - Messwerte über RS 232 an den PC senden
+ * send_to_uart(..) - Messwerte ï¿½ber RS 232 an den PC senden
  * PE:void
  * PA:void
  *************************************************************************/
 void send_to_uart(void )
 {
     //temperatur_to_string(temperatur,anzeigetext1);	// Temperatur zu String
-	//uart_puts(anzeigetext1);						// Temperatur über UART senden
+	//uart_puts(anzeigetext1);						// Temperatur ï¿½ber UART senden
     //uart_putc('\r');								// New Line
 	//phwert_to_string(ph_wert, anzeigetext1);		// pH Wert zu String		
-    //uart_puts(anzeigetext1);						// pH Wert über UART senden
+    //uart_puts(anzeigetext1);						// pH Wert ï¿½ber UART senden
     //uart_putc('\r');								// New Line
 	//zeit_to_string(zeit, anzeigetext1);				// Zeit zu String
-	//uart_puts(anzeigetext1);						// Zeit über UART senden
+	//uart_puts(anzeigetext1);						// Zeit ï¿½ber UART senden
     //uart_putc('\r');								// New Line
 	//datum_to_string(zeit, anzeigetext1);			// Datum zu string
-	//uart_puts(anzeigetext1);						// Datum über UART senden
+	//uart_puts(anzeigetext1);						// Datum ï¿½ber UART senden
 	//uart_putc('\r');								// New Line
 }
 /*************************************************************************
@@ -1421,12 +1436,12 @@ void send_to_uart(void )
  *************************************************************************/
 void mondlicht_dimmer(uint8_t helligkeit)
 {
-	static uint16_t pwm_wert;							// Wert für den compare-match des Timers 0-255
-	pwm_wert = (((uint16_t) helligkeit * 255) /100);	// Helligkeit in Prozent in 0-255 für den compare match umrechnen
+	static uint16_t pwm_wert;							// Wert fï¿½r den compare-match des Timers 0-255
+	pwm_wert = (((uint16_t) helligkeit * 255) /100);	// Helligkeit in Prozent in 0-255 fï¿½r den compare match umrechnen
 	OCR1B = pwm_wert;									// Timer schaltet den OC1B Ausgang beim angegebenen pwm_wert um
 }
 /*************************************************************************
- * reset_tageswerte(..) - Um Mitternacht werden die Tages Min/Max Werte zurückgesetzt
+ * reset_tageswerte(..) - Um Mitternacht werden die Tages Min/Max Werte zurï¿½ckgesetzt
  * PE:void
  * PA:void
  *************************************************************************/
@@ -1434,7 +1449,7 @@ void reset_tageswerte(void)
 {
 	static uint8_t alter_tag; // Hilfsvariable um festzustellen ob ein neuer Tag angefangen hat
 	
-	if(alter_tag != zeit.tag) // Feststellen ob das Datum des Tages geändert hat
+	if(alter_tag != zeit.tag) // Feststellen ob das Datum des Tages geï¿½ndert hat
 	{
 		extrem_temperatur.max_wert = temperatur;	// Max auf aktuelle Temperatur setzen
 		extrem_temperatur.min_wert = temperatur;	// Min auf aktuelle Temperatur setzen
@@ -1476,18 +1491,18 @@ void main_anzeige(void)
     temperatur_to_string(extrem_temperatur.min_wert,anzeigetext2);	// Tagesminimum zu String
     lcd_print((unsigned char*) anzeigetext2);		// Tagesminimum anzeigen	
 	/*************************************************************************
-	* Zustände der Ausgänge in Linie 4 anzeigen 
+	* Zustï¿½nde der Ausgï¿½nge in Linie 4 anzeigen 
 	*'^' entspricht eingeschaltet '_' entspricht ausgeschaltet
 	*************************************************************************/
     lcd_printlc(4,1,(unsigned char*)"H:");	// Heizer = H
     lcd_putchar(zustand_lcd(( HEIZER_ZUSTAND))); //Zustand abfragen und entsprechendes Zeichen anzeigen
-    lcd_print((unsigned char *)" K:");		// Lüfter = Kühler = K, da L schon belegt
+    lcd_print((unsigned char *)" K:");		// Lï¿½fter = Kï¿½hler = K, da L schon belegt
     lcd_putchar(zustand_lcd(( LUEFTER_ZUSTAND)));//Zustand abfragen und entsprechendes Zeichen anzeigen
     lcd_print((unsigned char *)" L:");			// Lampe = L
     lcd_putchar(zustand_lcd(( LAMPE_ZUSTAND)));	//Zustand abfragen und entsprechendes Zeichen anzeigen
     lcd_print((unsigned char *)" ML:");			// Mondlicht = ML
     lcd_putchar(zustand_lcd(zustandsbit.mondlicht)); //Zustand abfragen und entsprechendes Zeichen anzeigen
-	lcd_print((unsigned char *)" P:");			// Strömungspumpe = P
+	lcd_print((unsigned char *)" O:");			// Strï¿½mungspumpe = P
 	lcd_putchar(zustand_lcd(( OUT_ZUSTAND)));	//Zustand abfragen und entsprechendes Zeichen anzeigen
 	//ultoa(ph_wert, anzeigetext1, 10);
 	//lcd_printlc(1,13,anzeigetext1);

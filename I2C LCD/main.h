@@ -1,7 +1,7 @@
 /************************************************************************
  * Titel :		main.h
- * Projekt:		Diplomarbeit Aquariumsteuerung µQuarium
- * Funktion:	Headerdatei für main.c -> Deklarationen
+ * Projekt:		Diplomarbeit Aquariumsteuerung ï¿½Quarium
+ * Funktion:	Headerdatei fï¿½r main.c -> Deklarationen
  * Autor :		Stefan Keller
  * Lehrgang:	Techniker HF ET 08-11 Klasse A
  * Datum :		4.9.20111
@@ -27,9 +27,9 @@
 #include "DS1307.h"			// I2C Echtzeituhr
 #include "LM76.h"			// I2C Temperatursensor
 //#include "uart.h"			// UART Library
-#include "i2clcd.h"			// Ansteuerung LCD Display über I2C
+#include "i2clcd.h"			// Ansteuerung LCD Display ï¿½ber I2C
 #include "taster_timer.h"	// Timer und Tasten entprellen
-#include "lcdmenu.h"		// Menü für Einstellungen
+#include "lcdmenu.h"		// Menï¿½ fï¿½r Einstellungen
 #include "adc.h"			// ADC-Wandler und pH
 /*************************************************************************
 * Makros
@@ -53,7 +53,7 @@
 #define HEIZER_OFF	(PORTA &= ~(1<<PA2))
 #define HEIZER_ZUSTAND (PINA & (1<<PINA2))
 
-// Lüfter				-> Port A Pin 1
+// Lï¿½fter				-> Port A Pin 1
 #define LUEFTER_ON	(PORTA |= 1<<PA1)
 #define LUEFTER_OFF	(PORTA &= ~(1<<PA1))
 #define LUEFTER_ZUSTAND (PINA & (1<<PINA1))
@@ -63,18 +63,18 @@
 #define OUT_OFF	(PORTA &= ~(1<<PA0))
 #define OUT_ZUSTAND (PINA & (1<<PINA0))
 
-// LED für Alarm		-> Port C Pin 6
+// LED fï¿½r Alarm		-> Port C Pin 6
 #define ALARMLED_ON	(PORTC |= 1<<PC6)
 #define ALARMLED_OFF (PORTC &= ~(1<<PC6))
 
-// LED für Run Modus	-> Port X Pin 7
+// LED fï¿½r Run Modus	-> Port X Pin 7
 #define RUNLED_ON	(PORTC |= 1<<PC7)
 #define RUNLED_OFF	(PORTC &= ~(1<<PC7))
 
 /*************************************************************************
 * Defines Konstanten
 *************************************************************************/
-#define UART_BAUD_RATE		 57600	// Baudrate für RS232 
+#define UART_BAUD_RATE		 57600	// Baudrate fï¿½r RS232 
 #define LCDBACKLIGHT_ON_ZEIT 30		// Einschaltzeit des LCD Backlight (sec)
 #define WARTEZEIT_PH_KALIBRIEREN 180	// Wartezeit bei pH Sonde kalibrieren (sec)
 
@@ -83,16 +83,16 @@
 *************************************************************************/
 int8_t temperatur_offset = 0, mondlicht_helligkeit =0;
 uint8_t alarm_vektor = 0;	//Vektor zur Alarmzustand
-uint8_t MOON_ZUSTAND = 0;	// Mondlicht ein oder aus -> Da wegen PWM nicht direkt über Port abfragbar
+uint8_t MOON_ZUSTAND = 0;	// Mondlicht ein oder aus -> Da wegen PWM nicht direkt ï¿½ber Port abfragbar
 uint16_t temperatur = 0, ph_wert = 0; 
 
-char anzeigetext[41];	// Sting Array für Ausgabe auf LCD -> zwei Zeilen
-char anzeigetext1[21];	// String Array für Ausgabe auf LCD -> eine Zeile
-char anzeigetext2[21];	// String Array für Ausgabe auf LCD -> eine Zeile
+char anzeigetext[41];	// Sting Array fï¿½r Ausgabe auf LCD -> zwei Zeilen
+char anzeigetext1[21];	// String Array fï¿½r Ausgabe auf LCD -> eine Zeile
+char anzeigetext2[21];	// String Array fï¿½r Ausgabe auf LCD -> eine Zeile
 const char wochentagname [8][3] PROGMEM= {"  ","Mo","Di","Mi","Do","Fr","Sa","So"}; // Wochentage im Flash
-// Alarm Strings im Flash werden über alarm_vektor aufgerufen	
+// Alarm Strings im Flash werden ï¿½ber alarm_vektor aufgerufen	
 const char alarm_strings [7][9] PROGMEM= {"Alles OK", // Vektor O -> kein Alarm
-									"I2C ERR!",	// Vektor 1	-> Error I2C Übertragung
+									"I2C ERR!",	// Vektor 1	-> Error I2C ï¿½bertragung
 									"Temp ++!",	// Vektor 2 -> Temperatur zu hoch
 									"Temp --!",	// Vektor 3 -> Temperatur zu niedrig
 									"pH ++!"  ,	// Vektor 4 -> pH Wert zu hoch *wird nicht genutzt*
@@ -105,7 +105,7 @@ struct uhr
 			lampe_off1,	// Ausschaltzeit der Aquarium Lampe
 			ml_on,		// Einschaltzeit des Mondlichts
 			ml_off,		// Ausschaltzeit des Mondlichts
-			futterstopp,// Pumpenstoppzeit für Fütterung
+			futterstopp,// Pumpenstoppzeit fï¿½r Fï¿½tterung
 			lampe_on2,	// Einschaltzeit der Aquarium Lampe
 			lampe_off2,	// Ausschaltzeit der Aquarium Lampe
 			out_on1,	// pumpe / out zeit 1
@@ -114,7 +114,7 @@ struct uhr
 			out_off2;
 			
 
-typedef struct schalt_werte // Schaltwerte für Temperatur
+typedef struct schalt_werte // Schaltwerte fï¿½r Temperatur
 {
     int16_t max;		// Maximum Wert
     int16_t min;		// Minimum Wert
@@ -122,10 +122,10 @@ typedef struct schalt_werte // Schaltwerte für Temperatur
 } schalt_werte;
 schalt_werte  alarm, heizer, luefter;
 
-struct					//Zustandsbits für Ausgänge
+struct					//Zustandsbits fï¿½r Ausgï¿½nge
 {						// 0 -> aus, 1 -> ein
     unsigned heizer:1;	//Heizer 
-    unsigned luefter:1; //Lüfter
+    unsigned luefter:1; //Lï¿½fter
     unsigned lampe:1;	// Aquarium Lampe
     unsigned mondlicht:1;// Mondlicht 
     unsigned run:1;		// Run oder Wartungsmode
@@ -147,10 +147,10 @@ Extrem_Werte extrem_temperatur, extrem_ph;
 /*************************************************************************
 * Statische Variablem im EEPROM entsprechend der Variablen im RAM 
 *************************************************************************/
-uhr				out_on_eeprom1 EEPROM=					{0,0,12,0,0,0,0};
-uhr				out_off_eeprom1 EEPROM =				{0,0,12,0,0,0,0};
-uhr				out_on_eeprom2 EEPROM=					{0,0,12,0,0,0,0};
-uhr				out_off_eeprom2 EEPROM =				{0,0,12,0,0,0,0};
+uhr				out_on_eeprom1 EEPROM=					{0,0,14,0,0,0,0};
+uhr				out_off_eeprom1 EEPROM =				{0,0,16,0,0,0,0};
+uhr				out_on_eeprom2 EEPROM=					{0,0,23,0,0,0,0};
+uhr				out_off_eeprom2 EEPROM =				{0,0,10,0,0,0,0};
 int8_t			temperatur_offset_eeprom EEPROM =		0;
 uint8_t			mondlicht_helligkeit_eeprom EEPROM =	0;
 schalt_werte	alarm_eeprom EEPROM =					{395,370,0};
@@ -158,15 +158,15 @@ schalt_werte	heizer_eeprom EEPROM =					{395,370,0};
 schalt_werte	luefter_eeprom EEPROM=					{395,370,0};
 schalt_werte	ph_schalt_werte_eeprom EEPROM =			{542,542,0};
 Ph_reverenz		phwert_referenzen_eeprom EEPROM =		{299,542,666,133,233,140,429463936};
-uhr				lampe_on_eeprom1 EEPROM=				{0,0,12,0,0,0,0};
-uhr				lampe_off_eeprom1 EEPROM =				{0,0,12,0,0,0,0};
-uhr				ml_on_eeprom EEPROM=					{0,0,12,0,0,0,0};
-uhr				ml_off_eeprom EEPROM=					{0,0,12,0,0,0,0};
-uhr				futterstopp_eeprom EEPROM =				{0,1,0,0,0,0,0};
+uhr				lampe_on_eeprom1 EEPROM=				{0,0,10,0,0,0,0};
+uhr				lampe_off_eeprom1 EEPROM =				{0,0,14,0,0,0,0};
+uhr				ml_on_eeprom EEPROM=					{29,00,22,0,0,0,0};
+uhr				ml_off_eeprom EEPROM=					{59,0,23,0,0,0,0};
+uhr				futterstopp_eeprom EEPROM =				{0,10,0,0,0,0,0};
 uhr				zeit_eeprom EEPROM =					{0,1,0,0,0,0,0};
-uhr				lampe_on_eeprom2 EEPROM=				{0,0,15,0,0,0,0};
-uhr				lampe_off_eeprom2 EEPROM =				{0,0,16,0,0,0,0};
-uhr				dummy_zeit_eeprom EEPROM =				{0,0,16,0,0,0,0};
+uhr				lampe_on_eeprom2 EEPROM=				{0,0,17,0,0,0,0};
+uhr				lampe_off_eeprom2 EEPROM =				{30,0,22,0,0,0,0};
+uhr				dummy_zeit_eeprom EEPROM =				{0,0,0,0,0,0,0};
 
 	
 /*************************************************************************
@@ -210,7 +210,7 @@ void zeit_to_string( struct uhr ausgabe_zeit,char* temp_buffer);
 *************************************************************************/
 void datum_to_string( struct uhr ausgabe_datum,char* temp_buffer);
 /*************************************************************************
- * phwert_to_string(..) - PH-Wert in Form von 7000 in Kommazahl 7.0 umwandeln für die LCD Ausgabe
+ * phwert_to_string(..) - PH-Wert in Form von 7000 in Kommazahl 7.0 umwandeln fï¿½r die LCD Ausgabe
  * PE:uint16_t ph_wert // Aktueller Ph-Wert 7000 entspricht Ph 7.0 
  * PE:char * temp_buffer // Pointer auf Ausgabestring
  * PA:void
@@ -235,17 +235,17 @@ void menue_datum_einstellen( struct uhr *datum_pointer);
  *************************************************************************/
 void menue_temperatur_offset( int8_t *offset);
 /*************************************************************************
- * menue_schalttemperaturen_einstellen(..) -  Menü um die Schalttemperaturen vom Heizer, Lüfter und Alarmschwelle zu ändern
+ * menue_schalttemperaturen_einstellen(..) -  Menï¿½ um die Schalttemperaturen vom Heizer, Lï¿½fter und Alarmschwelle zu ï¿½ndern
  * PE:unsigned char * text1 // Text der an LCD Position (2,1) angezeigt wird
  * PE:unsigned char * text2 // Text der an LCD Position (3,1) angezeigt wird
  * PE:unsigned char * text3 // Text der an LCD Position (4,1) angezeigt wird
- * PE:schalt_temperaturen * schalt_aktuell // Schalttemperatur die geändert werden soll
+ * PE:schalt_temperaturen * schalt_aktuell // Schalttemperatur die geï¿½ndert werden soll
  * PE:schalt_temperaturen * eeprom // EEPROM Speicherplatz der Schalttemperatur
  * PA:void
  *************************************************************************/
 void menue_schalttemperaturen_einstellen( unsigned char *text1, unsigned char *text2, unsigned char *text3, schalt_werte *schalt_aktuell,schalt_werte *eeprom);
 /*************************************************************************
- * menu_mondlicht_helligkeit_einstellen(..) - Menü um die Helligkeit des Mondlicht LED einzustellen
+ * menu_mondlicht_helligkeit_einstellen(..) - Menï¿½ um die Helligkeit des Mondlicht LED einzustellen
  * Die PWM Duty Cycle kann von 0-100% einstellt werden
  * PE:uint8_t * helligkeit_pointer // Pointer auf Wert der Helligkeit 0 -100
  * PE:uint8_t * eeprom  // // EEPROM Speicherplatz der Helligkeit
@@ -253,8 +253,8 @@ void menue_schalttemperaturen_einstellen( unsigned char *text1, unsigned char *t
  *************************************************************************/
 void menu_mondlicht_helligkeit_einstellen( uint8_t * helligkeit_pointer, uint8_t *eeprom);
 /*************************************************************************
- * menu_phwert_klaibrieren(..) - Menü um die Sonde für den pH Wert zu kalibrieren
- * Die Sonde wird in die einzelnen Referenz Lösungen getaucht und dann 1 Min gewartet um 
+ * menu_phwert_klaibrieren(..) - Menï¿½ um die Sonde fï¿½r den pH Wert zu kalibrieren
+ * Die Sonde wird in die einzelnen Referenz Lï¿½sungen getaucht und dann 1 Min gewartet um 
  * einen stabilen Wert zu bekommen, dann wird der ADC Wert ausgelesen. 
  * Um Schluss werden die Funktionen zur Kalibrierung des pH Wertes berechnet
  * PA:void
@@ -262,137 +262,137 @@ void menu_mondlicht_helligkeit_einstellen( uint8_t * helligkeit_pointer, uint8_t
 void menu_phwert_kalibrieren(void);
 
 /*************************************************************************
-* Da den Funktionspointern im Menü keine Parameter mitgegeben werden können
-* werden über das Menü die "funkt_" Funktionen aufgerufen und so die eigentlichen 
-* Menüfunktionen mit Parameterübergabe aufgerufen
+* Da den Funktionspointern im Menï¿½ keine Parameter mitgegeben werden kï¿½nnen
+* werden ï¿½ber das Menï¿½ die "funkt_" Funktionen aufgerufen und so die eigentlichen 
+* Menï¿½funktionen mit Parameterï¿½bergabe aufgerufen
 *************************************************************************/
 /*************************************************************************
- * funkt_menu_temperatur_offet(..) - Funktionsmenü zur Einstellung des
+ * funkt_menu_temperatur_offet(..) - Funktionsmenï¿½ zur Einstellung des
  * Temperatur Offsets des LM 76
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_temperatur_offet(void);
 /*************************************************************************
- * funkt_menu_heizer(..) - Funktionsmenü zur Einstellung der Schalttemperaturen
+ * funkt_menu_heizer(..) - Funktionsmenï¿½ zur Einstellung der Schalttemperaturen
  * des Heizstabes
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_heizer(void);
 /*************************************************************************
- * funkt_menu_luefter(..) - Funktionsmenü zur Einstellung der Schalttemperaturen
- * des Lüfters
+ * funkt_menu_luefter(..) - Funktionsmenï¿½ zur Einstellung der Schalttemperaturen
+ * des Lï¿½fters
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_luefter(void);
 /*************************************************************************
- * funkt_menu_alarm(..) - Funktionsmenü zur Einstellung der maximalen und
+ * funkt_menu_alarm(..) - Funktionsmenï¿½ zur Einstellung der maximalen und
  * minimalen Temperatur im Aquarium
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_alarm(void);
 /*************************************************************************
- * funkt_menu_datum(..) - Funktionsmenü zur Einstellung des aktuellen
+ * funkt_menu_datum(..) - Funktionsmenï¿½ zur Einstellung des aktuellen
  * Datums des DS 1307
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_datum(void);
 /*************************************************************************
- * funkt_menu_uhr(..) - Funktionsmenü zur Einstellung der aktuellen 
+ * funkt_menu_uhr(..) - Funktionsmenï¿½ zur Einstellung der aktuellen 
  * Uhrzeit des DS 1307
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_uhr(void);
 /*************************************************************************
- * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
- * Einschaltzeit für die Lampe
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Einschaltzeit fï¿½r die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_lampe_ein_am(void);
 /*************************************************************************
- * funkt_menu_lampe_aus_am(..) - Funktionsmenü zur Einstellung der 
- * Ausschaltzeit für die Lampe
+ * funkt_menu_lampe_aus_am(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Ausschaltzeit fï¿½r die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_lampe_aus_am(void);
 /*************************************************************************
- * funkt_menu_lampe_ein_pm(..) - Funktionsmenü zur Einstellung der 
- * Einschaltzeit für die Lampe
+ * funkt_menu_lampe_ein_pm(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Einschaltzeit fï¿½r die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_lampe_ein_pm(void);
 /*************************************************************************
- * funkt_menu_lampe_aus_pm(..) - Funktionsmenü zur Einstellung der 
- * Ausschaltzeit für die Lampe
+ * funkt_menu_lampe_aus_pm(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Ausschaltzeit fï¿½r die Lampe
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_lampe_aus_pm(void);
 /*************************************************************************
- * funkt_menu_futterstop(..) - Funktionsmenü zur Einstellung der 
- * Zeit wie lange die Pumpe beim Fütterungsstopp ausgeschaltet werden soll
+ * funkt_menu_futterstop(..) - Funktionsmenï¿½ zur Einstellung der 
+ * Zeit wie lange die Pumpe beim Fï¿½tterungsstopp ausgeschaltet werden soll
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_futterstop(void);
 /*************************************************************************
- * funkt_menu_mondlicht_ein(..) - Funktionsmenü zur Einstellung der 
+ * funkt_menu_mondlicht_ein(..) - Funktionsmenï¿½ zur Einstellung der 
  * Einschaltzeit des Mondlichts
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_mondlicht_ein(void);
 /*************************************************************************
- * funkt_menu_mondlicht_aus(..) - Funktionsmenü zur Einstellung
+ * funkt_menu_mondlicht_aus(..) - Funktionsmenï¿½ zur Einstellung
  * der Ausschaltzeit des Mondlichts
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_mondlicht_aus(void);
 /*************************************************************************
- * funkt_menu_mondlicht_helligkeit(..) - Funktionsmenü für die Dimmung 
+ * funkt_menu_mondlicht_helligkeit(..) - Funktionsmenï¿½ fï¿½r die Dimmung 
  * des Mondlichts
  * PE:void
  * PA:void
 *************************************************************************/
 void funkt_menu_mondlicht_helligkeit(void);
 /*************************************************************************
- * funkt_menu_phwert_kalibrieren(..) - Funktionsmenü für die Kalibrierung der
+ * funkt_menu_phwert_kalibrieren(..) - Funktionsmenï¿½ fï¿½r die Kalibrierung der
  * pH Sonde
  * PE:void
  * PA:void
  *************************************************************************/
 void funkt_menu_phwert_kalibrieren(void);
 /*************************************************************************
- * funkt_menu_about(..) - Abouttext für Hard und Softwareversionen anzeigen
+ * funkt_menu_about(..) - Abouttext fï¿½r Hard und Softwareversionen anzeigen
  * PE:void
  * PA:void
  *************************************************************************/
 void funkt_menu_about(void);
 /*************************************************************************
- * funkt_menu_max_werte(..) - Menüanzeige der Tages Maximalwerte von Temperatur und pH Wert
+ * funkt_menu_max_werte(..) - Menï¿½anzeige der Tages Maximalwerte von Temperatur und pH Wert
  * PE:void
  * PA:void
  *************************************************************************/
 void funkt_menu_max_werte(void);
 /*************************************************************************
- * vergleiche_temperaturen(..) -  Temperatur mit mit min/max Werten vergleichen und Ergebnis zurückgeben
+ * vergleiche_temperaturen(..) -  Temperatur mit mit min/max Werten vergleichen und Ergebnis zurï¿½ckgeben
  * PE:uint32_t * minimum // Minimum Temperatur mit der verglichen wird
  * PE:uint32_t * maximum // Maximum Temperatur mit der verglichen wird
  * PE:uint32_t * aktuelle_temperatur // Aktuelle Temperatur des Wassers mit der verglichen wird
- * PA:uint8_t // Ergebnis zurückgeben 1 -> höher als max 2 -> kleiner als min, 0 -> Ergebnis zwischen den Temperaturen
+ * PA:uint8_t // Ergebnis zurï¿½ckgeben 1 -> hï¿½her als max 2 -> kleiner als min, 0 -> Ergebnis zwischen den Temperaturen
  *************************************************************************/
 uint8_t vergleiche_temperaturen(int16_t *minimum, int16_t *maximum, int16_t *aktuelle_temperatur);
 /*************************************************************************
- * vergleiche_zeiten(..) - Vergleiche die Schaltzeiten der Ausgänge mit der aktuellen Zeit und gibt das Ergebnis zurück
+ * vergleiche_zeiten(..) - Vergleiche die Schaltzeiten der Ausgï¿½nge mit der aktuellen Zeit und gibt das Ergebnis zurï¿½ck
  * PE:struct uhr * ein_zeit // Pointer auf struct der Einschaltzeit
  * PE:struct uhr * aus_zeit // Pointer auf struct der Ausschaltzeit
  * PE:struct uhr * aktuelle_zeit // Pointer auf struct der aktuellen Zeit
@@ -400,29 +400,29 @@ uint8_t vergleiche_temperaturen(int16_t *minimum, int16_t *maximum, int16_t *akt
  *************************************************************************/
 uint8_t vergleiche_zeiten(struct uhr *ein_zeit, struct uhr *aus_zeit, struct uhr *aktuelle_zeit);
 /*************************************************************************
- * lampen_schalten(..) - Zustandsbit für die zeitgesteuerten 
- * Ausgänge setzen
+ * lampen_schalten(..) - Zustandsbit fï¿½r die zeitgesteuerten 
+ * Ausgï¿½nge setzen
  * PE:void
  * PA:void
 *************************************************************************/
 void lampen_schalten(void);
 /*************************************************************************
- * temperatuen_schalten(..) - Zustandbits für die temperaturgesteuerten
- * Ausgänge und Alarmzustand setzen
+ * temperatuen_schalten(..) - Zustandbits fï¿½r die temperaturgesteuerten
+ * Ausgï¿½nge und Alarmzustand setzen
  * PE:void
  * PA:void
  *************************************************************************/
 void temperatuen_schalten(void);
 /*************************************************************************
- * ausgaenge_ansteuern(..) - Errechnete Schaltzustände sammeln und 
- * die Hardwareausgänge entsprechen dem Modus der Anlage schalten
+ * ausgaenge_ansteuern(..) - Errechnete Schaltzustï¿½nde sammeln und 
+ * die Hardwareausgï¿½nge entsprechen dem Modus der Anlage schalten
  * PE:void
  * PA:void
  *************************************************************************/
 void ausgaenge_ansteuern( void );
 /*************************************************************************
- * futterstop_aktivieren(..) -  Für Pumpenstopp bei der Fütterung wird ein Counter geladen 
- * welcher über den Timer alle 1 sec dekrementiert wird bis Zeit abgelaufen ist
+ * futterstop_aktivieren(..) -  Fï¿½r Pumpenstopp bei der Fï¿½tterung wird ein Counter geladen 
+ * welcher ï¿½ber den Timer alle 1 sec dekrementiert wird bis Zeit abgelaufen ist
  * PE:struct uhr * stopp_zeit // Pointer auf Zeit wie lange die Pumpe ausgeschaltet werden soll
  * PA:void
  *************************************************************************/
@@ -433,13 +433,13 @@ void futterstop_aktivieren(struct uhr *stopp_zeit);
  *************************************************************************/
 void read_eeprom_daten(void);
 /*************************************************************************
- * zustand_lcd(..) - Zeichen generieren um die Schaltzustände der Ausgänge auf den Display anzuzeigen
+ * zustand_lcd(..) - Zeichen generieren um die Schaltzustï¿½nde der Ausgï¿½nge auf den Display anzuzeigen
  * PE:uint8_t zustand // 1 = Ein , 0 = Aus
  * PA:uint8_t			// Hex Zeichen retournieren Ein=^  Aus=_
  *************************************************************************/
 uint8_t zustand_lcd(uint8_t zustand);
 /*************************************************************************
- * send_to_uart(..) - Messwerte über RS 232 an den PC senden
+ * send_to_uart(..) - Messwerte ï¿½ber RS 232 an den PC senden
  * PE:void
  * PA:void
  *************************************************************************/
@@ -451,7 +451,7 @@ void send_to_uart(void );
  *************************************************************************/
 void mondlicht_dimmer(uint8_t helligkeit);
 /*************************************************************************
- * reset_tageswerte(..) - Um Mitternacht werden die Tages Min/Max Werte zurückgesetzt
+ * reset_tageswerte(..) - Um Mitternacht werden die Tages Min/Max Werte zurï¿½ckgesetzt
  * PE:void
  * PA:void
  *************************************************************************/
