@@ -907,6 +907,63 @@ void funkt_menu_lampe_aus_pm(void)
 	// Eigentliches Menü für die Einstellung der Einschaltzeit der Lampe  mit entsprechenden Übergabewerten aufrufen
     menue_zeiten_einstellen(&lampe_off2, &lampe_off_eeprom2 );
 }
+
+
+/*************************************************************************
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
+ * Einschaltzeit für die Lampe
+ * PE:void
+ * PA:void
+*************************************************************************/
+void funkt_menu_out_on1(void)
+{
+    lcd_command(LCD_CLEAR);
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit AM Einstell.   Out einschalten:")));
+    menue_zeiten_einstellen(&out_on1, &out_on_eeprom1 );
+}
+/*************************************************************************
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
+ * Einschaltzeit für die Lampe
+ * PE:void
+ * PA:void
+*************************************************************************/
+void funkt_menu_out_off1(void)
+{
+    lcd_command(LCD_CLEAR);
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit AM Einstell.   Out ausschalten:")));
+    menue_zeiten_einstellen(&out_off1, &out_off_eeprom1 );
+}
+/*************************************************************************
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
+ * Einschaltzeit für die Lampe
+ * PE:void
+ * PA:void
+*************************************************************************/
+void funkt_menu_out_on2(void)
+{
+    lcd_command(LCD_CLEAR);
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit PM Einstell.   Out einschalten:")));
+    menue_zeiten_einstellen(&out_on2, &out_on_eeprom2 );
+}
+/*************************************************************************
+ * funkt_menu_lampe_ein_am(..) - Funktionsmenü zur Einstellung der 
+ * Einschaltzeit für die Lampe
+ * PE:void
+ * PA:void
+*************************************************************************/
+void funkt_menu_out_off2(void)
+{
+    lcd_command(LCD_CLEAR);
+    lcd_printlrc(1,1,(unsigned char *)strcpy_P (anzeigetext,PSTR("Zeit PM Einstell.   Out ausschalten:")));
+    menue_zeiten_einstellen(&out_off2, &out_off_eeprom2 );
+}
+
+
+
+
+
+
+
 /*************************************************************************
  * funkt_menu_futterstop(..) - Funktionsmenü zur Einstellung der 
  * Zeit wie lange die Pumpe beim Fütterungsstopp ausgeschaltet werden soll
@@ -1275,14 +1332,15 @@ void ausgaenge_ansteuern(void)
 		LAMPE_ON;
 		ALARMLED_OFF;
 		BUZZER_OFF;
+		OUT_OFF;
 		mondlicht_dimmer(0);
 		
 	}
 	/*************************************************************************
 	* Pumpe kann in jedem Zustand ab und angeschaltet werden
 	*************************************************************************/
-	if (zustandsbit.pumpe) PUMPE_ON; // Entsprechend  den Zustand Pumpe an und ausschalten
-		else PUMPE_OFF;
+	if (zustandsbit.pumpe) OUT_ON; // Entsprechend  den Zustand Pumpe an und ausschalten
+		else OUT_OFF;
 }
 /*************************************************************************
  * futterstop_aktivieren(..) -  Für Pumpenstopp bei der Fütterung wird ein Counter geladen 
@@ -1430,7 +1488,7 @@ void main_anzeige(void)
     lcd_print((unsigned char *)" ML:");			// Mondlicht = ML
     lcd_putchar(zustand_lcd(zustandsbit.mondlicht)); //Zustand abfragen und entsprechendes Zeichen anzeigen
 	lcd_print((unsigned char *)" P:");			// Strömungspumpe = P
-	lcd_putchar(zustand_lcd(( PUMPE_ZUSTAND)));	//Zustand abfragen und entsprechendes Zeichen anzeigen
+	lcd_putchar(zustand_lcd(( OUT_ZUSTAND)));	//Zustand abfragen und entsprechendes Zeichen anzeigen
 	//ultoa(ph_wert, anzeigetext1, 10);
 	//lcd_printlc(1,13,anzeigetext1);
 	/*************************************************************************

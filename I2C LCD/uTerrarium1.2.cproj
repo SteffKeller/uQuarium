@@ -77,7 +77,7 @@
         <documentation help="" />
         <offline-documentation help="" />
         <dependencies>
-          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.39.0" />
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.44.1" />
         </dependencies>
       </framework-data>
     </AsfFrameworkConfig>
@@ -92,7 +92,7 @@
     <ResetRule>0</ResetRule>
     <eraseonlaunchrule>0</eraseonlaunchrule>
     <EraseKey />
-    <avrtoolserialnumber>BUR221675323</avrtoolserialnumber>
+    <avrtoolserialnumber>BUR222773405</avrtoolserialnumber>
     <avrdeviceexpectedsignature>0x1E960A</avrdeviceexpectedsignature>
     <avrtoolinterfaceclock>200000</avrtoolinterfaceclock>
     <com_atmel_avrdbg_tool_ispmk2>
@@ -128,7 +128,7 @@
         <InterfaceName>JTAG</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.pickit4</ToolType>
-      <ToolNumber>BUR221675323</ToolNumber>
+      <ToolNumber>BUR222773405</ToolNumber>
       <ToolName>MPLAB® PICkit 4</ToolName>
     </com_atmel_avrdbg_tool_pickit4>
   </PropertyGroup>

@@ -81,9 +81,13 @@ const char str30[] PROGMEM = "3-1 Lampe ein AM";		// Licht Menü
 const char str31[] PROGMEM = "3-2 Lampe aus AM";
 const char str35[] PROGMEM = "3-3 Lampe ein PM";		// Licht Menü
 const char str36[] PROGMEM = "3-4 Lampe aus PM";
-const char str32[] PROGMEM = "3-5 ML ein";
-const char str33[] PROGMEM = "3-6 ML aus";
-const char str34[] PROGMEM = "3-7 ML Helligkeit";
+const char str50[] PROGMEM = "3-5 Out ein AM";		// Licht Menü
+const char str51[] PROGMEM = "3-6 Out aus AM";
+const char str52[] PROGMEM = "3-7 Out ein PM";		// Licht Menü
+const char str53[] PROGMEM = "3-8 Out aus PM";
+const char str32[] PROGMEM = "3-9 ML ein";
+const char str33[] PROGMEM = "3-10 ML aus";
+const char str34[] PROGMEM = "3-11 ML Helligkeit";
 
 const char str40[] PROGMEM = "4-1 pH kalib.";	// pH Menü
 
@@ -104,14 +108,18 @@ Menu_Entry Menu2[3] = {
 			{22, menu_has_function, sizeof (Menu2) / sizeof (Menu2[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str22, (FuncPtr)funkt_menu_futterstop}
 };
 // Licht Menü
-Menu_Entry Menu3[7] = {
+Menu_Entry Menu3[11] = {
             {30, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str30, (FuncPtr)funkt_menu_lampe_ein_am},
             {31, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str31, (FuncPtr)funkt_menu_lampe_aus_am},
 			{32, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str35, (FuncPtr)funkt_menu_lampe_ein_pm},
-            {33, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str36, (FuncPtr)funkt_menu_lampe_aus_pm},
-			{34, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str32, (FuncPtr)funkt_menu_mondlicht_ein},
-            {35, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str33, (FuncPtr)funkt_menu_mondlicht_aus},
-		    {36, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str34, (FuncPtr)funkt_menu_mondlicht_helligkeit},
+            {33, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str36, (FuncPtr)funkt_menu_lampe_aus_pm},		
+			{34, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str50, (FuncPtr)funkt_menu_out_on1},
+			{35, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str51, (FuncPtr)funkt_menu_out_off1},
+			{36, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str52, (FuncPtr)funkt_menu_out_on2},
+			{37, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str53, (FuncPtr)funkt_menu_out_off2},
+			{38, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str32, (FuncPtr)funkt_menu_mondlicht_ein},
+            {39, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str33, (FuncPtr)funkt_menu_mondlicht_aus},
+		    {50, menu_has_function, sizeof (Menu3) / sizeof (Menu3[0]), (Menu_Entry *) 0, (Menu_Entry *) 0, str34, (FuncPtr)funkt_menu_mondlicht_helligkeit},
 };
 // pH Menü
 Menu_Entry Menu4[1] = {

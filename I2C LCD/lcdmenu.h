@@ -67,6 +67,10 @@ extern void funkt_menu_mondlicht_helligkeit(void);
 extern void funkt_menu_about(void);
 extern void funkt_menu_max_werte(void);
 extern void funkt_menu_phwert_kalibrieren(void);
+extern void funkt_menu_out_on1(void);
+extern void funkt_menu_out_off1(void);
+extern void funkt_menu_out_on2(void);
+extern void funkt_menu_out_off2(void);
 
 
 #define menu_has_submenu   0           //Causes the menu to call a submenu specified by the "sub" pointer.

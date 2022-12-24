@@ -59,9 +59,9 @@
 #define LUEFTER_ZUSTAND (PINA & (1<<PINA1))
 
 // Aquarium Pumpe		-> Port A Pin 0
-#define PUMPE_ON	(PORTA |= 1<<PA0)
-#define PUMPE_OFF	(PORTA &= ~(1<<PA0))
-#define PUMPE_ZUSTAND (PINA & (1<<PINA0))
+#define OUT_ON	(PORTA |= 1<<PA0)
+#define OUT_OFF	(PORTA &= ~(1<<PA0))
+#define OUT_ZUSTAND (PINA & (1<<PINA0))
 
 // LED für Alarm		-> Port C Pin 6
 #define ALARMLED_ON	(PORTC |= 1<<PC6)
@@ -107,7 +107,12 @@ struct uhr
 			ml_off,		// Ausschaltzeit des Mondlichts
 			futterstopp,// Pumpenstoppzeit für Fütterung
 			lampe_on2,	// Einschaltzeit der Aquarium Lampe
-			lampe_off2;	// Ausschaltzeit der Aquarium Lampe
+			lampe_off2,	// Ausschaltzeit der Aquarium Lampe
+			out_on1,	// pumpe / out zeit 1
+			out_off1,
+			out_on2,	// pumpe / out zeit 2
+			out_off2;
+			
 
 typedef struct schalt_werte // Schaltwerte für Temperatur
 {
@@ -142,6 +147,10 @@ Extrem_Werte extrem_temperatur, extrem_ph;
 /*************************************************************************
 * Statische Variablem im EEPROM entsprechend der Variablen im RAM 
 *************************************************************************/
+uhr				out_on_eeprom1 EEPROM=					{0,0,12,0,0,0,0};
+uhr				out_off_eeprom1 EEPROM =				{0,0,12,0,0,0,0};
+uhr				out_on_eeprom2 EEPROM=					{0,0,12,0,0,0,0};
+uhr				out_off_eeprom2 EEPROM =				{0,0,12,0,0,0,0};
 int8_t			temperatur_offset_eeprom EEPROM =		0;
 uint8_t			mondlicht_helligkeit_eeprom EEPROM =	0;
 schalt_werte	alarm_eeprom EEPROM =					{395,370,0};
